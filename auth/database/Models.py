@@ -1,27 +1,26 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy
-import conf
+import enum
+
+import database.dbconf as dbconf
 
 Base = declarative_base()
 
 def initDatabase():
     dbDriver = None
-    if (conf.dbName == 'postgres'):
+    if (dbconf.dbName == 'postgres'):
         dbDriver = 'postgres+pypostgresql'
 
     if dbDriver is None:
-        print("Currently, there is no suport for database " + conf.dbName)
+        print("Currently, there is no suport for database " + dbconf.dbName)
         exit(-1)
-
-    print(dbDriver + '://' + \
-                    conf.dbUser + ':' + conf.dbPdw + '@' + conf.dbHost)
 
     try:
         engine = sqlalchemy.create_engine(dbDriver + '://' + \
-                    conf.dbUser + ':' + conf.dbPdw + '@' + conf.dbHost)
+                    dbconf.dbUser + ':' + dbconf.dbPdw + '@' + dbconf.dbHost)
     except:
         #TODO: find out what exception is throw
         print("Could not connect to the databse")
@@ -36,28 +35,50 @@ def initDatabase():
     s = session()
     return s
 
+
+class PermissionEnum(enum.Enum):
+    permit = 'permit'
+    deny = 'deny'
+
+
 #Model for the database tables
 class Permission(Base):
     __tablename__ = 'permission'
+    #serialise
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     path = Column(String, nullable=False)
     method = Column(String(30), nullable=False)
-    permission = Column(String, nullable=False)
+    permission =  Column( Enum(PermissionEnum), nullable=False)
     users = relationship('User', secondary='user_permission',cascade="delete")
     groups = relationship('Group', secondary='group_permission',cascade="delete")
 
+
 class User(Base):
     __tablename__ = 'user'
+    #serialise
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     username = Column(String(50), unique=True, nullable=False)
+    passwd = Column(String, nullable=False)
+    service = Column(String, nullable=False)
+    email = Column(String, nullable=False)
     permissions = relationship('Permission', secondary='user_permission', cascade="delete")
     groups = relationship('Group', secondary='user_group', cascade="delete")
 
 class Group(Base):
     __tablename__ = 'group'
+    #serialise
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+   
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), unique=True, nullable=False)
     description = Column(String, nullable=True)
     #role = Column(Boolean)
     permissions = relationship('Permission', secondary='group_permission', cascade="delete")

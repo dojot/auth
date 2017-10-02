@@ -14,8 +14,9 @@ the service's docker image.
 
 ```shell
 # you may need sudo for those
-apt-get install -y python-pip
-pip install uwsgi flask requests PyJWT pbkdf2 pymongo
+apt-get install -y python3-pip
+pip3 install sqlalchemy py-postgresql
+#pip install uwsgi flask requests PyJWT pbkdf2 pymongo
 ```
 
 Another alternative is to use docker to run the service. To build the container, from the
