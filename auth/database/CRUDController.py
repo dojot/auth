@@ -1,35 +1,46 @@
 #this file contains function to create, update and delete Users, groups and permission
 import sqlalchemy
 import re
+import os
+import binascii
+from pbkdf2 import crypt
 from database.Models import Permission, User, Group, PermissionEnum
 
 class NotFound(Exception):
     def __init__(self, message):
         self.message = message
 
+class BadRequest(Exception):
+    def __init__(self, message):
+        self.message = message
+
 #helper function to check user fields
 def checkUser(user, ignore = []):
+    #users can´t choose a ID
+    if 'id' in user.keys():
+        del user['id']
+
     if 'username' not in user.keys() or len(user['username']) == 0:
-        raise ValueError('Missing username')
+        raise BadRequest('Missing username')
 
     if re.match(r'^[a-z0-9_]+$', user['username']) is None:
-        raise ValueError('Invalid username, only lowercase alhpanumeric and underscores allowed')
+        raise BadRequest('Invalid username, only lowercase alhpanumeric and underscores allowed')
 
     if ('passwd' not in ignore) and ('passwd' not in user.keys() or len(user['passwd']) == 0):
-        raise ValueError('Missing passwd')
+        raise BadRequest('Missing passwd')
 
     if 'service' not in user.keys() or len(user['service']) == 0:
-        raise ValueError('Missing service')
+        raise BadRequest('Missing service')
     if re.match(r'^[a-z0-9_]+$', user['username']) is None:
-        raise ValueError('Invalid username, only alhpanumeric and underscores allowed')
+        raise BadRequest('Invalid username, only alhpanumeric and underscores allowed')
 
     if 'email' not in user.keys() or len(user['email']) == 0:
-        raise ValueError('Missing email')
+        raise BadRequest('Missing email')
     if re.match(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', user['email']) is None:
-        raise ValueError('Invalid email address')
+        raise BadRequest('Invalid email address')
 
     if 'name' not in user.keys() or len(user['name']) == 0:
-        raise ValueError("Missing user's name (full name)")
+        raise BadRequest("Missing user's name (full name)")
 
     return user
 
@@ -38,16 +49,19 @@ def createUser(dbSession, user):
     checkUser(user)
     try:
         anotherUser =  dbSession.query(User.id).filter_by(username=user['username']).one()
-        raise ValueError("username '" + user['username'] + "' is in use.")
+        raise BadRequest("username '" + user['username'] + "' is in use.")
     except sqlalchemy.orm.exc.NoResultFound:
         pass
+
     try:
         anotherUser =  dbSession.query(User.id).filter_by(email=user['email']).one()
-        raise ValueError("Email '" + user['email'] + "' is in use.")
+        raise BadRequest("Email '" + user['email'] + "' is in use.")
     except sqlalchemy.orm.exc.NoResultFound:
         pass
+    user['salt'] = str(binascii.hexlify(os.urandom(8)),'ascii')
+    user['hash'] = crypt(user['passwd'], user['salt'], 1000).split('$').pop()
+    del user['passwd']
     user = User(**user)
-    dbSession.add(user)
     return user
 
 def searchUser(dbSession, username = None):
@@ -61,23 +75,49 @@ def searchUser(dbSession, username = None):
         raise NotFound("No results found with these filters")
     return users
 
-def getUser(dbSession, userId):
+def getUser(dbSession, userId: int):
     try:
-        user = dbSession.query(User).filter_by(id=userId).one()
+        user = dbSession.query(User).filter_by( id = userId ).one()
         return user
-    except sqlalchemy.orm.exc.NoResultFound:
+    except (sqlalchemy.orm.exc.NoResultFound, ValueError):
         raise NotFound("No user found with this ID")
 
-def updateUser(dbSession, userId, userData):
-    checkUser(userData)
-    updated = dbSession.query(User).filter_by(id=userId) \
-            .update(userData)
-    if (updated == 0):
-        raise NotFound("No user found with this ID")
+def updateUser(dbSession, userId: int, updatedInfo):
+    oldUser = getUser(dbSession, userId)
 
-def deleteUser(dbSession, userId):
+    if 'id' in updatedInfo.keys() and updatedInfo['id'] != oldUser.id:
+        raise BadRequest("user ID can't be updated")
+    if 'username' in updatedInfo.keys() and updatedInfo['username'] != oldUser.username:
+        raise BadRequest("usernames can't be updated")
+
+    if 'passwd' not in updatedInfo.keys():
+        checkUser(updatedInfo, ['passwd'])
+    else:
+        checkUser(updatedInfo)
+
+    #verify if the email is in use by another user
+    if 'email' in updatedInfo.keys() and updatedInfo['email'] != oldUser.email:
+        try:
+            anotherUser = dbSession.query(User).filter_by( email = updatedInfo['email'] ).one()
+            raise BadRequest('email already in use')
+        except sqlalchemy.orm.exc.NoResultFound:
+            pass
+
+    if 'passwd' in updatedInfo.keys():
+        oldUser.salt = str(binascii.hexlify(os.urandom(8)),'ascii')
+        oldUser.hash = crypt(updatedInfo['passwd'], oldUser.salt, 1000).split('$').pop()
+        del updatedInfo['passwd']
+
+    #TODO: find a iterative way
+    if 'name' in updatedInfo.keys() : oldUser.name =  updatedInfo['name']
+    if 'service' in updatedInfo.keys() : oldUser.service =  updatedInfo['service']
+    if 'email' in updatedInfo.keys() : oldUser.email =  updatedInfo['email']
+
+    return oldUser
+
+def deleteUser(dbSession, userId: int):
     try:
-        user = dbSession.query(User).filter_by(id=userId).one()
+        user = dbSession.query(User).filter_by(id = userId).one()
         dbSession.delete(user)
     except sqlalchemy.orm.exc.NoResultFound:
         raise NotFound("No user found with this ID")
@@ -86,23 +126,22 @@ def deleteUser(dbSession, userId):
 def checkPerm(perm):
     if 'permission' in perm.keys():
         if (perm['permission'] not in [p.value for p in PermissionEnum]):
-            raise ValueError("An access control rule can not return '" + perm['permission'] + "'")
+            raise BadRequest("An access control rule can not return '" + perm['permission'] + "'")
     else:
         #default value
         perm['permission'] = 'permit'
 
     if 'path' not in perm.keys() or len(perm['path']) == 0:
-        raise ValueError('Missing permission Path')
+        raise BadRequest('Missing permission Path')
 
     if 'method' not in perm.keys() or len(perm['method']) == 0:
-        raise ValueError('Missing permission method')
+        raise BadRequest('Missing permission method')
     #TODO: check if path and method are valid regex
 
 #creae a permission
 def createPerm(dbSession, permission):
     checkPerm(permission)
     perm = Permission(**permission)
-    dbSession.add(perm)
     return perm
 
 def searchPerm(dbSession, path=None, method=None, permission=None):
@@ -113,7 +152,7 @@ def searchPerm(dbSession, path=None, method=None, permission=None):
         permQuery = permQuery.filter(Permission.method.like('%' + method + '%'))
     if (permission is not None and len(permission) > 0):
         if (permission not in [p.value for p in PermissionEnum]):
-            raise ValueError("Invalid filter. Permission can't be '" + permission + "'")
+            raise BadRequest("Invalid filter. Permission can't be '" + permission + "'")
         permQuery = permQuery.filter_by(permission=permission)
 
     perms = permQuery.all()
@@ -144,9 +183,9 @@ def deletePerm(dbSession, permissionId):
 
 def checkGroup(group):
     if 'name' not in group.keys() or len(group['name']) == 0:
-        raise ValueError('Missing group name')
+        raise BadRequest('Missing group name')
     if re.match(r'^[a-zA-Z0-9]+$', group['name']) is None:
-        raise ValueError('Invalid group name, only alhpanumeric allowed')
+        raise BadRequest('Invalid group name, only alhpanumeric allowed')
 
     #TODO: must chekc the description?
 
@@ -154,11 +193,10 @@ def createGroup(dbSession, group):
     checkGroup(group)
     try:
         anotherGroup =  dbSession.query(Group.id).filter_by(name=group['name']).one()
-        raise ValueError("Group name '" + group['name'] + "' is in use.")
+        raise BadRequest("Group name '" + group['name'] + "' is in use.")
     except sqlalchemy.orm.exc.NoResultFound:
         pass
     g = Group(**group)
-    dbSession.add(g)
     return g
 
 def searchGroup(dbSession, name=None):

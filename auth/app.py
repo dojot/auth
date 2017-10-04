@@ -9,16 +9,13 @@ from flask import Flask
 from flask import request
 from flask import make_response as fmake_response
 
-import pymongo
-
 from pbkdf2 import crypt
 import jwt
 
 import requests
 
-from conf import loadconf, getConfValue
+import conf
 import kongUtils
-from CollectionManager import CollectionManager
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -27,12 +24,6 @@ def make_response(payload, status):
     resp = fmake_response(payload, status)
     resp.headers['content-type'] = 'application/json'
     return resp
-
-collection = CollectionManager('auth').getCollection('users')
-
-#create index to optimize queries and enforce fields uniqueness
-collection.create_index([('username', pymongo.ASCENDING)], name='username_index', unique=True)
-collection.create_index([('email', pymongo.ASCENDING)], name='email_index', unique=True)
 
 def formatResponse(status, message=None):
     payload = None
@@ -100,30 +91,6 @@ class ParseError(Exception):
         self.msg = msg
     def __str__(self):
         return self.msg
-
-def checkUser(user, ignore = []):
-    if 'username' not in user.keys() or len(user['username']) == 0:
-        raise ParseError('Missing username')
-    if re.match(r'^[a-z0-9_]+$', user['username']) is None:
-        raise ParseError('Invalid username, only lowercase alhpanumeric and underscores allowed')
-
-    if ('passwd' not in ignore) and ('passwd' not in user.keys() or len(user['passwd']) == 0):
-        raise ParseError('Missing passwd')
-
-    if 'service' not in user.keys() or len(user['service']) == 0:
-        raise ParseError('Missing service')
-    if re.match(r'^[a-z0-9_]+$', user['username']) is None:
-        raise ParseError('Invalid username, only alhpanumeric and underscores allowed')
-
-    if 'email' not in user.keys() or len(user['email']) == 0:
-        raise ParseError('Missing email')
-    if re.match(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', user['email']) is None:
-        raise ParseError('Invalid email address')
-
-    if 'name' not in user.keys() or len(user['name']) == 0:
-        raise ParseError("Missing user's name (full name)")
-
-    return user
 
 # should have restricted access
 @app.route('/user', methods=['GET'])

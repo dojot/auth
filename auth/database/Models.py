@@ -2,39 +2,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
+from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 import enum
 
 import database.dbconf as dbconf
-
-Base = declarative_base()
-
-def initDatabase():
-    dbDriver = None
-    if (dbconf.dbName == 'postgres'):
-        dbDriver = 'postgres+pypostgresql'
-
-    if dbDriver is None:
-        print("Currently, there is no suport for database " + dbconf.dbName)
-        exit(-1)
-
-    try:
-        engine = sqlalchemy.create_engine(dbDriver + '://' + \
-                    dbconf.dbUser + ':' + dbconf.dbPdw + '@' + dbconf.dbHost)
-    except:
-        #TODO: find out what exception is throw
-        print("Could not connect to the databse")
-        exit(-1)
-
-    # (sqlalchemy.exc.DBAPIError, sqlalchemy.util.queue.Empty, postgresql.exceptions.AuthenticationSpecificationError):
-    session = sessionmaker()
-    session.configure(bind=engine)
-    Base.metadata.create_all(engine)
-
-    #create a databse session
-    s = session()
-    return s
-
+from flaskAlchemyInit import app, db
 
 class PermissionEnum(enum.Enum):
     permit = 'permit'
@@ -42,7 +15,7 @@ class PermissionEnum(enum.Enum):
 
 
 #Model for the database tables
-class Permission(Base):
+class Permission(db.Model):
     __tablename__ = 'permission'
     #serialise
     def as_dict(self):
@@ -56,27 +29,42 @@ class Permission(Base):
     groups = relationship('Group', secondary='group_permission',cascade="delete")
 
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'user'
+    sensibleFields = [ 'hash', 'salt', 'secret', 'kongId', 'key' ]
+
     #serialise
     def as_dict(self):
-       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def safeDict(self):
+        #don´t serialise sensible fields
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns \
+            if c.name  not in self.sensibleFields }
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     username = Column(String(50), unique=True, nullable=False)
-    passwd = Column(String, nullable=False)
     service = Column(String, nullable=False)
     email = Column(String, nullable=False)
+    hash = Column(String, nullable=False)
+    salt = Column(String, nullable=False)
+
+    #these fields are configured by kong after user creation
+    secret = Column(String, nullable=True)
+    key = Column(String, nullable=True)
+    kongId = Column(String, nullable=True)
+
+    #relationships
     permissions = relationship('Permission', secondary='user_permission', cascade="delete")
     groups = relationship('Group', secondary='user_group', cascade="delete")
 
-class Group(Base):
+class Group(db.Model):
     __tablename__ = 'group'
     #serialise
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-   
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False)
     description = Column(String, nullable=True)
@@ -84,17 +72,17 @@ class Group(Base):
     permissions = relationship('Permission', secondary='group_permission', cascade="delete")
     users = relationship('User', secondary='user_group', cascade="delete")
 
-class UserPermission(Base):
+class UserPermission(db.Model):
     __tablename__ = 'user_permission'
     permission_id = Column(Integer, ForeignKey('permission.id'), primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('user.id'), primary_key=True, index=True)
 
-class GroupPermission(Base):
+class GroupPermission(db.Model):
     __tablename__ = 'group_permission'
     permission_id = Column(Integer, ForeignKey('permission.id'), primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey('group.id'), primary_key=True, index=True)
 
-class UserGroup(Base):
+class UserGroup(db.Model):
     __tablename__ = 'user_group'
     user_id = Column(Integer, ForeignKey('user.id'), primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey('group.id'), primary_key=True, index=True)
