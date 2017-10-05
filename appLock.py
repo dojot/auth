@@ -3,15 +3,17 @@
 # this script check a list of dependencies, like if databases is ready.
 #  When all dependencies are fulfilled, the script ends
 
-from auth.CollectionManager import CollectionManager
+#from auth.CollectionManager import CollectionManager
 import sys
 import json
 from time import sleep
+import postgresql
 
 poolingsec = 5
 
+'''
 def waitMongo(configuration):
-    print 'Waiting for mongo...'
+    print('Waiting for mongo...')
     while (True):
         try:
             collection = CollectionManager(configuration['database']).getCollection(configuration['collection'])
@@ -19,14 +21,32 @@ def waitMongo(configuration):
                 x = collection.find_one()
                 break
         except KeyError as e:
-            print 'Malformed configuration at dependence->mongo->' + str(e.message) + ' aborting.'
+            print('Malformed configuration at dependence->mongo->' + str(e.message) + ' aborting.')
             exit(-1)
         except: #pymongo erros
             collection = None
 
-        print 'mongo fail..will try again in ' + str(poolingsec)
+        print('mongo fail..will try again in ' + str(poolingsec))
         sleep(poolingsec)
-    print 'Mongo is ready'
+    print('Mongo is ready')
+'''
+
+def waitPostgres(configuration):
+    print('Waiting for postgres...')
+    while (True):
+        try:
+            db = postgresql.open('pq://' + configuration['user'] + ':' + configuration['passwd'] + '@' + configuration['host'])
+            if db is not None:
+                break
+        except KeyError as e:
+            print('Malformed configuration at dependence->mongo->' + str(e.message) + ' aborting.')
+            exit(-1)
+        except: #pymongo erros
+            pass
+
+        print('postgres fail..will try again in ' + str(poolingsec))
+        sleep(poolingsec)
+    print('Postgres is ready')
 
 def verifyDependences():
     i = 1
@@ -37,9 +57,15 @@ def verifyDependences():
             i = i + 1
 
         elif sys.argv[i] == '--mongo':
-            configuration = json.loads(sys.argv[i+1])
-            waitMongo(configuration)
+            waitMongo(json.loads(sys.argv[i+1]))
             i = i + 1
+
+        elif sys.argv[i] == '--postgres':
+            waitPostgres(json.loads(sys.argv[i+1]))
+            i = i + 1
+
+        else:
+            print("Unknow dependence " + sys.argv[i] + ". Ignoring.")
 
         #we could add more dependences types here
         #elif sys.argv[i] == ?
@@ -47,5 +73,5 @@ def verifyDependences():
 
 if __name__ == '__main__':
     verifyDependences()
-    print 'all dependences fulfilled. Exiting'
+    print('all dependences fulfilled. Exiting')
     exit(0)

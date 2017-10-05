@@ -2,14 +2,12 @@ import logging
 import requests
 from requests import ConnectionError
 import conf
+from flaskAlchemyInit import HTTPRequestError
 
 LOGGER = logging.getLogger('device-manager.' + __name__)
 LOGGER.addHandler(logging.StreamHandler())
 LOGGER.setLevel(logging.INFO)
 
-class KongError(Exception):
-    def __init__(self, message):
-        self.message = message
 
 def configureKong(user):
     try:
@@ -41,7 +39,7 @@ def revokeKongSecret(username, tokenId):
         requests.delete("%s/consumers/%s/jwt/%s" % (conf.kongURL, username, tokenId))
     except ConnectionError:
         LOGGER.error("Failed to connect to kong")
-        raise KongError("Failed to connect to kong")
+        raise HTTPRequestError(500, "Failed to connect to kong")
 
 
 def removeFromKong(user):
@@ -49,4 +47,4 @@ def removeFromKong(user):
         requests.delete("%s/consumers/%s" % (conf.kongURL, user))
     except ConnectionError:
         LOGGER.error("Failed to connect to kong")
-        raise KongError("Failed to connect to kong")
+        raise HTTPRequestError(500, "Failed to connect to kong")

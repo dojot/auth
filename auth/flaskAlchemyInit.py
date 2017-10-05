@@ -1,9 +1,17 @@
+'''
+ This file purpose is to configure Flask with Alchemy
+ Also, some generic HTTP formatter functions are provided
+ There is also a generic exception class for HTTP errors
+ This code is independent, and could be reused in any
+ Flask + Alchemy project
+'''
+
 from flask import Flask
 from flask import make_response as fmake_response
 import json
 from flask_sqlalchemy import SQLAlchemy
 
-import database.dbconf as dbconf
+import conf as dbconf
 
 #make the initial flask + alchem configuration
 app = Flask(__name__)
@@ -12,7 +20,7 @@ app.url_map.strict_slashes = False
 #select database driver
 if (dbconf.dbName == 'postgres'):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres+pypostgresql://' + \
-                    dbconf.dbUser + ':' + dbconf.dbPdw + '@' + dbconf.dbHost
+                dbconf.dbUser + ':' + dbconf.dbPdw + '@' + dbconf.dbHost
 
 else:
     print("Currently, there is no suport for database " + dbconf.dbName)
@@ -22,6 +30,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 db.create_all()
+
+class HTTPRequestError(Exception):
+    def __init__(self, errorCode, message):
+        self.message = message
+        self.errorCode = errorCode
 
 #utility function for HTTP responses
 def make_response(payload, status):
@@ -41,6 +54,6 @@ def formatResponse(status, message=None):
 
 def loadJsonFromRequest(request):
     if request.mimetype != 'application/json':
-        raise ValueError('invalid mimetype')
+        raise HTTPRequestError(400, 'invalid mimetype')
 
     return request.get_json()

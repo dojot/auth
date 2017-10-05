@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 import enum
 
-import database.dbconf as dbconf
+import conf as dbconf
 from flaskAlchemyInit import app, db
 
 class PermissionEnum(enum.Enum):
@@ -31,7 +31,11 @@ class Permission(db.Model):
 
 class User(db.Model):
     __tablename__ = 'user'
+    # fields that should not be returned to the user
     sensibleFields = [ 'hash', 'salt', 'secret', 'kongId', 'key' ]
+
+    # fields that can be filled by user input
+    fillable = ['name', 'username', 'service', 'email']
 
     #serialise
     def as_dict(self):
@@ -51,9 +55,9 @@ class User(db.Model):
     salt = Column(String, nullable=False)
 
     #these fields are configured by kong after user creation
-    secret = Column(String, nullable=True)
-    key = Column(String, nullable=True)
-    kongId = Column(String, nullable=True)
+    secret = Column(String, nullable=False)
+    key = Column(String, nullable=False)
+    kongId = Column(String, nullable=False)
 
     #relationships
     permissions = relationship('Permission', secondary='user_permission', cascade="delete")

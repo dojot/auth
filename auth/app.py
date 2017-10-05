@@ -1,291 +1,118 @@
-import json
-import os
-import uuid
-import re
-import time
-import binascii
+#!/usr/bin/python3
+'''
+ This file contains the available endpoints
+ functions here focus on extract data from HTTP requests
+ and format responses and errors to JSON
+ These functions should be as smaller as possible
+ most of the input validation is done on the controllers
+'''
 
 from flask import Flask
 from flask import request
-from flask import make_response as fmake_response
-
-from pbkdf2 import crypt
-import jwt
-
-import requests
+import json
 
 import conf
-import kongUtils
+import database.CRUDController as crud
+import authentication as auth
+import kongUtils as kong
+from flaskAlchemyInit import app, db, formatResponse, HTTPRequestError, \
+                             make_response, loadJsonFromRequest
 
-app = Flask(__name__)
-app.url_map.strict_slashes = False
-
-def make_response(payload, status):
-    resp = fmake_response(payload, status)
-    resp.headers['content-type'] = 'application/json'
-    return resp
-
-def formatResponse(status, message=None):
-    payload = None
-    if message:
-        payload = json.dumps({ 'message': message, 'status': status})
-    elif status >= 200 and status < 300:
-        payload = json.dumps({ 'message': 'ok', 'status': status})
-    else:
-        payload = json.dumps({ 'message': 'Request failed', 'status': status})
-
-    return make_response(payload, status);
-
+#authenticion endpoint
 @app.route('/', methods=['POST'])
 def authenticate():
-    if request.mimetype != 'application/json':
-        return formatResponse(400, 'invalid mimetype')
-
     try:
-        authData = json.loads(request.data)
-    except ValueError:
-        return formatResponse(400, 'malformed JSON')
+        authData = loadJsonFromRequest(request)
+        if 'username' not in authData.keys() :  return formatResponse(400, 'missing username')
+        if 'passwd' not in authData.keys()   :  return formatResponse(400, 'missing passwd')
 
-    if 'username' not in authData.keys():
-        return formatResponse(400, 'missing username')
-    if 'passwd' not in authData.keys():
-        return formatResponse(400, 'missing passwd')
+        jwt = auth.authenticate(db.session, authData['username'], authData['passwd'])
 
-    user = collection.find_one({'username' : authData['username'].lower()}, {"_id" : False})
-    if user is None:
-        return formatResponse(401, 'not authorized') #should not give hints about authentication problems
+        return make_response(json.dumps({'jwt': jwt}), 200)
 
-    if user['hash'] == crypt(authData['passwd'], user['salt'], 1000).split('$').pop():
-        tokenExpiration = getConfValue('tokenExpiration')
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
 
-        claims = {
-            'iss': user['key'],
-            'iat': int(time.time()),
-            'exp': int(time.time() + tokenExpiration),
 
-            #generate a random string as nonce
-            'jti' : binascii.b2a_hex(os.urandom(16)),
-            'service': user['service'],
-            'username': user['username']
-        }
 
-        if 'name' in user.keys():
-            claims['name'] = user['name']
-        if 'email' in user.keys():
-            claims['email'] = user['email']
-
-        if 'profile' in user.keys():
-            claims['profile'] = user['profile']
-        else:
-            claims['profile'] = 'user'
-
-        encoded = jwt.encode(claims, user['secret'], algorithm='HS256')
-        return make_response(json.dumps({'jwt': encoded}), 200)
-
-    return formatResponse(401, 'not authorized')
-
-class ParseError(Exception):
-    """ Thrown indicating that an invalid user representation has been given """
-
-    def __init__(self, msg):
-        self.msg = msg
-    def __str__(self):
-        return self.msg
-
-# should have restricted access
-@app.route('/user', methods=['GET'])
-def listUsers():
-    query={}
-    if len(request.args) > 0:
-        if 'username' in request.args:
-            query['username'] = request.args['username']
-        if 'id' in request.args:
-            query['id'] = request.args['id']
-
-    userList = []
-    fieldFilter = {'_id': False, 'salt': False, 'hash': False, 'secret': False, 'key': False, 'kongid': False }
-    for d in collection.find(query, fieldFilter):
-        userList.append(d)
-
-    if (len(userList) == 0) and (len(query) > 0):
-        return formatResponse(404, "No users matching the criteria were found")
-
-    return make_response(json.dumps({ "users" : userList}), 200)
-
-# should have restricted access
 @app.route('/user', methods=['POST'])
 def createUser():
-    if request.mimetype != 'application/json':
-        return formatResponse(400, 'invalid mimetype')
-
     try:
-        authData = json.loads(request.data)
-    except ValueError:
-        return formatResponse(400, 'malformed JSON')
-    authData['id'] = str(uuid.uuid4())
+        authData = loadJsonFromRequest(request)
+
+        #create user
+        newUser = crud.createUser(db.session, authData)
+
+        #if no problems occur to create user (no exceptions), configure kong
+        kongData = kong.configureKong(newUser.username)
+        if kongData is None:
+            return formatResponse(500, 'failed to configure verification subsystem')
+        newUser.secret = kongData['secret']
+        newUser.key = kongData['key']
+        newUser.kongId = kongData['kongid']
+
+        db.session.add(newUser)
+        db.session.commit()
+        return make_response(json.dumps({"user": newUser.safeDict(), "message": "user created"}), 200)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+
+@app.route('/user', methods=['GET'])
+def listUsers():
     try:
-        checkUser(authData)
-    except ParseError as e:
-        return formatResponse(400, str(e))
+        users = crud.searchUser(db.session, \
+            #filters
+            request.args['username'] if 'username' in request.args else None
+        )
+        usersSafe = list(map(lambda u: u.safeDict(), users))
+        return make_response(json.dumps({ "users" : usersSafe}), 200)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
 
-    if collection.find_one({'username' : authData['username']}, {"_id" : False}):
-        return formatResponse(400, 'user already exists')
 
-    if collection.find_one({'email' : authData['email']}, {"_id" : False}):
-        return formatResponse(400, 'email already in use')
-
-    authData['salt'] = os.urandom(8).encode('hex')
-    authData['hash'] = crypt(authData['passwd'], authData['salt'], 1000).split('$').pop()
-
-    kongData = kongUtils.configureKong(authData['username'])
-    if kongData is None:
-        return formatResponse(500, 'failed to configure verification subsystem')
-    authData['secret'] = kongData['secret']
-    authData['key'] = kongData['key']
-    authData['kongid'] = kongData['kongid']
-    del authData['passwd']
-    collection.insert_one(authData.copy())
-    result = {
-        "username": authData['username'],
-        "service": authData['service'],
-        "id": authData['id']
-    }
-    return make_response(json.dumps({"user": result, "message": "user created"}), 200)
-
-# should have restricted access
 @app.route('/user/<userid>', methods=['GET'])
 def getUser(userid):
-    query = {'id': userid}
-    fieldFilter = {'_id': False, 'salt': False, 'hash': False, 'secret': False, 'key': False, 'kongid': False }
-    old_user = collection.find_one(query, fieldFilter)
-    if old_user is None:
-        return formatResponse(404, 'Unknown user id')
-
-    return make_response(json.dumps({"user": old_user}), 200)
+    try:
+        user = crud.getUser(db.session, int(userid))
+        return make_response(json.dumps({"user": user.safeDict()}), 200)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
 
 # should have restricted access
 @app.route('/user/<userid>', methods=['PUT'])
 def updateUser(userid):
-    if request.mimetype != 'application/json':
-        return formatResponse(400, 'invalid mimetype')
-
-    query = {'id': userid}
-    old_user = collection.find_one(query, {"_id" : False})
-    if old_user is None:
-        return formatResponse(404, 'Unknown user id')
-
     try:
-        authData = json.loads(request.data)
-    except ValueError:
-        return formatResponse(400, 'malformed JSON')
+        authData = loadJsonFromRequest(request)
+        #update user fields
+        oldUser = crud.updateUser(db.session, int(userid), authData)
 
-    if 'id' not in authData.keys():
-        authData['id'] = userid
-    elif authData['id'] != userid:
-        return formatResponse(400, "user ID can't be updated")
+        #create a new kong secret and delete the old one
+        kongData = kong.configureKong(oldUser.username)
+        if kongData is None:
+            return formatResponse(500, 'failed to configure verification subsystem')
 
-    try:
-        if 'passwd' not in authData.keys():
-            checkUser(authData, ['passwd'])
-        else:
-            checkUser(authData)
-    except ParseError as e:
-        return formatResponse(400, str(e))
+        kong.revokeKongSecret(oldUser.username, oldUser.kongId)
+        oldUser.secret = kongData['secret']
+        oldUser.key = kongData['key']
+        oldUser.kongid = kongData['kongid']
+        db.session.add(oldUser)
+        db.session.commit()
+        return formatResponse(200)
 
-    if old_user['username'] != authData['username']:
-        return formatResponse(400, "usernames can't be updated")
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
 
-    #verify if the email is in use by another user
-    anotherUser = collection.find_one({'email' : authData['email']}, {"_id" : False})
-    if anotherUser is not None:
-        if anotherUser['id'] != old_user['id']:
-            return formatResponse(400, 'email already in use')
-
-    if 'passwd' in authData.keys():
-        authData['salt'] = os.urandom(8).encode('hex')
-        authData['hash'] = crypt(authData['passwd'], authData['salt'], 1000).split('$').pop()
-        del authData['passwd']
-    else:
-        authData['salt'] = old_user['salt']
-        authData['hash'] = old_user['hash']
-
-    kongData = kongUtils.configureKong(authData['username'])
-    if kongData is None:
-        return formatResponse(500, 'failed to configure verification subsystem')
-
-    if 'kongid' in old_user.keys():
-        kongUtils.revokeKongSecret(old_user['username'], old_user['kongid'])
-    authData['secret'] = kongData['secret']
-    authData['key'] = kongData['key']
-    authData['kongid'] = kongData['kongid']
-    collection.replace_one(query, authData.copy())
-    return formatResponse(200)
 
 @app.route('/user/<userid>', methods=['DELETE'])
 def removeUser(userid):
-    query = {'id': userid}
-    old_user = collection.find_one(query, {'id': False})
-    if old_user is None:
-        return formatResponse(404, 'Unknown user id')
-
     try:
-        kongUtils.removeFromKong(old_user['username'])
-    except:
-        return formatResponse(500, "Failed to configure verification subsystem")
-
-    collection.delete_one(query)
-    return formatResponse(200, "User removed")
-
-
-# should have restricted access
-@app.route('/user/search', methods=['GET'])
-def searchUser():
-    term = None
-    if len(request.args) > 0:
-        if 'q' in request.args:
-            term = request.args['q']
-
-    if not term:
-        return formatResponse(400, 'No query given')
-
-    #TODO: define a minimum and maximun search term len
-    if (len(term) < 2):
-        return formatResponse(400, 'The search term must have at least 3 characters')
-
-    if re.match(r'^[a-zA-Z0-9_@.]+$', term) is None:
-        return formatResponse(400, 'Invalid search term. only alhpanumeric, AT, dots and underscores allowed')
-
-    term = term.lower()
-    userList = []
-
-    query = {"$or":[ {"name": {"$regex": re.compile(term, re.IGNORECASE)}} , {"username": {"$regex": term} }, {"email": {"$regex": term} }]}
-    fieldFilter = {'_id': False, 'salt': False, 'hash': False, 'secret': False, 'key': False, 'kongid': False }
-    for d in collection.find(query, fieldFilter):
-        userList.append(d)
-
-    if (len(userList) == 0):
-        return formatResponse(404, "No users matching the criteria were found")
-
-    return make_response(json.dumps({ "users" : userList}), 200)
-
-# should have restricted access for outside the aplication
-@app.route('/revoke', methods=['DELETE'])
-def revokeAll():
-    #for all user, create a new secret and delete the old one
-    for user in collection.find():
-        kongData = kongUtils.configureKong(user['username'])
-        if kongData is None:
-            return 'failed to configure verification subsystem'
-
-        #revoke the old key
-        if 'kongid' in user.keys():
-            kongUtils.revokeKongSecret(user['username'], user['kongid'])
-
-        user['secret'] = kongData['secret']
-        user['key'] = kongData['key']
-        user['kongid'] = kongData['kongid']
-        collection.replace_one( {'_id': user['_id']} , user.copy())
-    return formatResponse(200)
+        old_user = crud.getUser(db.session, int(userid))
+        kong.removeFromKong(old_user.username)
+        crud.deleteUser(db.session, int(userid))
+        db.session.commit()
+        return formatResponse(200, "User removed")
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', threaded=True)

@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # wait for database
-/usr/bin/python /var/www/app/appLock.py --sleep 5 \
-                                        --mongo '{"database":"auth","collection":"conf"}' \
-                                         &> /tmp/appLock.log
+/usr/bin/python /usr/src/app/appLock.py --sleep 5 \
+                            --postgres '{"user" : "kong", "passwd" : "", "host" : "postgres"}' \
+                            &> /tmp/appLock.log
+
+cd auth
 
 # handle service initialization
 if [ $1 = 'start' ]; then
@@ -17,7 +19,7 @@ if [ $1 = 'start' ]; then
             exit 1
         fi
         sleep $sleep_time
-        exec gunicorn auth.app:app \
+        exec gunicorn app:app \
                   --bind 0.0.0.0:5000 \
                   --reload -R \
                   --access-logfile - \
