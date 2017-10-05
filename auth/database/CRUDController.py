@@ -1,4 +1,5 @@
-#this file contains function to create, update and delete Users, groups and permission
+#this file contains function to create search, update and 
+# delete Users, groups and permissions
 import sqlalchemy
 import re
 import os
