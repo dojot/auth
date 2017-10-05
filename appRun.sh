@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # wait for database
-/usr/bin/python /usr/src/app/appLock.py --sleep 5 \
-                            --postgres '{"user" : "kong", "passwd" : "", "host" : "postgres"}' \
-                            &> /tmp/appLock.log
+/usr/bin/python /var/www/app/appLock.py --sleep 5 \
+                                        --mongo '{"database":"auth","collection":"conf"}'  \
+                                         &> /tmp/appLock.log
 
 cd auth
+#create database tables
+echo -e "from app import db\ndb.create_all()" | python3
 
 # handle service initialization
 if [ $1 = 'start' ]; then
