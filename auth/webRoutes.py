@@ -33,8 +33,6 @@ def authenticate():
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-
-
 @app.route('/user', methods=['POST'])
 def createUser():
     try:
@@ -111,6 +109,18 @@ def removeUser(userid):
         crud.deleteUser(db.session, int(userid))
         db.session.commit()
         return formatResponse(200, "User removed")
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+
+
+@app.route('/pap/crud/permission', methods=['POST'])
+def createPermission():
+    try:
+        permData = loadJsonFromRequest(request)
+        newPerm = crud.createPerm(db.session, permData)
+        db.session.add(newPerm)
+        db.session.commit()    
+        return make_response(json.dumps({"status": 200, "id": newPerm.id}), 200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
