@@ -135,6 +135,7 @@ def checkPerm(perm):
 
 #creae a permission
 def createPerm(dbSession, permission):
+    permission = {k: permission[k] for k in permission if k in Permission.fillable}
     checkPerm(permission)
     perm = Permission(**permission)
     return perm

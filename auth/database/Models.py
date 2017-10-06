@@ -17,9 +17,16 @@ class PermissionEnum(enum.Enum):
 #Model for the database tables
 class Permission(db.Model):
     __tablename__ = 'permission'
+
+    # fields that can be filled by user input
+    fillable = ['path', 'method', 'permission']
+
     #serialise
     def as_dict(self):
-       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {c.name: str( getattr(self, c.name) ) for c in self.__table__.columns}
+
+    def safeDict(self):
+        return self.as_dict()
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     path = Column(String, nullable=False)

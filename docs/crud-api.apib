@@ -1,0 +1,211 @@
+FORMAT: 1A
+
+# PY-RBAC CRUD API
+
+Endpoints to perform permissions, groups and profiles management
+
+# Group CRUD Permissions and Group
+
+## Permissions creation and search [/pap/crud/permission]
+### Create a new permission [POST]
+notice that regular expressions can be used on the 'path' and 'method' fields.
+
++ Request (application/json)
+  + Body
+    {
+        "path" : "/devices/info/\*",
+        "method" : "POST|PUT|DELETE",
+        "permission" : "permit"
+    }
+
++ Response 200 (application/json)
+  {
+    "status": 200,
+    "id": 131
+  }
+
+### Search permission [GET]
+
++ Parameters
+  + path: (optional, string) - a path string.
+  + method: (optional, enum) - one HTTP method.
+  + permission: (optiona, enum) - "permit" or "deny".
+
++ Response 404 (application/json)
+  {
+    "status": 404,
+    "message": "No permission found with these filters"
+  }
+
++ Response 200 (application/json)
+  {
+      "permissions": [
+        {
+            "id" : 131,
+            "path" : "/devices/info/\*",
+            "method" : "POST|PUT|DELETE",
+            "permission" : "permit"
+        },
+        {
+            "id" : 132,
+            "path" : "/auth/user",
+            "method" : "\*",
+            "permission" : "deny"
+        }
+      ]
+    }
+
+## Permissions management [/pap/crud/permission/<id>]
+### Get a permission [GET]
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "No permission found with this ID"
+  }
+
++ Response 200 (application/json)
+  {
+      "id" : 131,
+      "path" : "/devices/info/\*",
+      "method" : "POST|PUT|DELETE",
+      "permission" : "permit"
+  }
+
+### Update a permission [PUT]
++ Request (application/json)
+  + Body
+    {
+        "path" : "/devices/info/\*",
+        "method" : "POST|PUT|DELETE",
+        "permission" : "permit"
+    }
+
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "No permission with found this ID"
+  }
+
++ Response 200 (application/json)
+  {
+    "status": 200,
+    "message": "ok"
+  }
+
+### Remove a permission [DELETE]
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "No permission found with this ID"
+  }
+
++ Response 200 (application/json)
+  {
+    "status": 200,
+    "message": "ok"
+  }
+
+
+## Group creation [/pap/crud/group]
+### Create a new group [POST]
+
++ Request (application/json)
+  + Body
+    {
+        "name" : "group1",
+        "type" : "project",
+        "role" : False
+    }
+
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "Group named group1 already exists"
+  }
+
++ Response 200 (application/json)
+  {
+    "status": 200,
+    "id": 3
+  }
+
+
+### Search Groups [GET]
+
++ Parameters
+  + name: (optional, string) - a group name.
+
++ Response 404 (application/json)
+  {
+    "status": 404,
+    "message": "No group found with these filters"
+  }
+
++ Response 200 (application/json)
+  {
+      "groups": [
+        {
+          "id" : 3,
+          "name" : "admin",
+          "role" : True
+        },
+        {
+          "id" : 4,
+          "name" : "projectN",
+          "role" : False
+        }
+      ]
+    }
+
+## Group management [/pap/crud/group/<id>]
+### Get a group [GET]
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "No group found with this ID"
+  }
+
++ Response 200 (application/json)
+  {
+    "id" : 3,
+    "name" : "group1",
+    "role" : False
+  }
+
+### Update a group [PUT]
++ Request (application/json)
+  + Body
+    {
+        "name" : "projectX"
+    }
+
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "No group found with this ID"
+  }
+
++ Response 200 (application/json)
+  {
+    "status": 200,
+    "message": "ok"
+  }
+
+### Remove a group [DELETE]
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "No group found with this ID"
+  }
+
++ Response 400 (application/json)
+  {
+    "status": 400,
+    "message": "To delete a role group, all group members should be removed"
+  }
+
++ Response 200 (application/json)
+  {
+    "status": 200,
+    "message": "ok"
+  }

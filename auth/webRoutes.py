@@ -33,8 +33,6 @@ def authenticate():
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-
-
 @app.route('/user', methods=['POST'])
 def createUser():
     try:
