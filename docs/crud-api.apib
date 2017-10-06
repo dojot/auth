@@ -41,34 +41,34 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
   {
       "permissions": [
         {
-            "id" : 131,
+            "id" : "131",
             "path" : "/devices/info/\*",
             "method" : "POST|PUT|DELETE",
-            "permission" : "permit"
+            "permission" : ""PermissionEnum.permit""
         },
         {
-            "id" : 132,
+            "id" : "132",
             "path" : "/auth/user",
             "method" : "\*",
-            "permission" : "deny"
+            "permission" : "PermissionEnum.deny""
         }
       ]
     }
 
 ## Permissions management [/pap/crud/permission/<id>]
 ### Get a permission [GET]
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "No permission found with this ID"
   }
 
 + Response 200 (application/json)
   {
-      "id" : 131,
+      "id" : "131",
       "path" : "/devices/info/\*",
       "method" : "POST|PUT|DELETE",
-      "permission" : "permit"
+      "permission" : "PermissionEnum.permit"
   }
 
 ### Update a permission [PUT]
@@ -93,9 +93,9 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
   }
 
 ### Remove a permission [DELETE]
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "No permission found with this ID"
   }
 
@@ -147,21 +147,21 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
         {
           "id" : 3,
           "name" : "admin",
-          "role" : True
+          "description" : "Full privilege group"
         },
         {
           "id" : 4,
-          "name" : "projectN",
-          "role" : False
+          "name" : "projectN"
+          "description" : null
         }
       ]
     }
 
 ## Group management [/pap/crud/group/<id>]
 ### Get a group [GET]
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "No group found with this ID"
   }
 
@@ -169,7 +169,7 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
   {
     "id" : 3,
     "name" : "group1",
-    "role" : False
+    "description" : null
   }
 
 ### Update a group [PUT]

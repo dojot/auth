@@ -73,9 +73,15 @@ class User(db.Model):
 
 class Group(db.Model):
     __tablename__ = 'group'
+
+    fillable = ['name', 'description']
+
     #serialise
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def safeDict(self):
+        return self.as_dict()
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False)
