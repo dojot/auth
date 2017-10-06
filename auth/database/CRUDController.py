@@ -1,4 +1,4 @@
-#this file contains function to create search, update and 
+#this file contains function to create search, update and
 # delete Users, groups and permissions
 import sqlalchemy
 import re
@@ -79,7 +79,7 @@ def getUser(dbSession, userId: int):
 
 def updateUser(dbSession, userId: int, updatedInfo):
     #drop invalid fields
-    user = {k: user[k] for k in user if k in User.fillable + ['passwd']}
+    updatedInfo = {k: updatedInfo[k] for k in updatedInfo if k in User.fillable + ['passwd']}
     oldUser = getUser(dbSession, userId)
 
     if 'username' in updatedInfo.keys() and updatedInfo['username'] != oldUser.username:

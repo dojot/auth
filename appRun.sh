@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # wait for database
-/usr/bin/python /var/www/app/appLock.py --sleep 5 \
-                                        --mongo '{"database":"auth","collection":"conf"}' \
-                                         &> /tmp/appLock.log
+python3 /usr/src/app/appLock.py --sleep 10 --max_retries 10
+rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 cd auth
 #create database tables

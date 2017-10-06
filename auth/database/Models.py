@@ -35,7 +35,7 @@ class User(db.Model):
     sensibleFields = [ 'hash', 'salt', 'secret', 'kongId', 'key' ]
 
     # fields that can be filled by user input
-    fillable = ['name', 'username', 'service', 'email']
+    fillable = ['name', 'username', 'service', 'email', 'profile']
 
     #serialise
     def as_dict(self):
@@ -43,7 +43,7 @@ class User(db.Model):
 
     def safeDict(self):
         #don´t serialise sensible fields
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns \
+        return {c.name: str( getattr(self, c.name) ) for c in self.__table__.columns \
             if c.name  not in self.sensibleFields }
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -51,6 +51,7 @@ class User(db.Model):
     username = Column(String(50), unique=True, nullable=False)
     service = Column(String, nullable=False)
     email = Column(String, nullable=False)
+    profile  = Column(String, nullable=False)
     hash = Column(String, nullable=False)
     salt = Column(String, nullable=False)
 
