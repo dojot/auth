@@ -113,6 +113,7 @@ def removeUser(userid):
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
+# Permission CRUD
 @app.route('/pap/crud/permission', methods=['POST'])
 def createPermission():
     try:
@@ -166,9 +167,7 @@ def deletePermission(permid):
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-
-
-
+# Group CRUD
 @app.route('/pap/crud/group', methods=['POST'])
 def createGroup():
     try:

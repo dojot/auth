@@ -44,13 +44,13 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
             "id" : "131",
             "path" : "/devices/info/\*",
             "method" : "POST|PUT|DELETE",
-            "permission" : ""PermissionEnum.permit""
+            "permission" : "PermissionEnum.permit"
         },
         {
             "id" : "132",
             "path" : "/auth/user",
             "method" : "\*",
-            "permission" : "PermissionEnum.deny""
+            "permission" : "PermissionEnum.deny"
         }
       ]
     }
@@ -80,9 +80,9 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
         "permission" : "permit"
     }
 
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "No permission with found this ID"
   }
 
@@ -113,13 +113,12 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
   + Body
     {
         "name" : "group1",
-        "type" : "project",
-        "role" : False
+        "description" : "a fine group"
     }
 
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "Group named group1 already exists"
   }
 
@@ -133,7 +132,7 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
 ### Search Groups [GET]
 
 + Parameters
-  + name: (optional, string) - a group name.
+  + name: (optional, string) - a group name, or part of a group name.
 
 + Response 404 (application/json)
   {
@@ -179,9 +178,9 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
         "name" : "projectX"
     }
 
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "No group found with this ID"
   }
 
@@ -192,16 +191,10 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
   }
 
 ### Remove a group [DELETE]
-+ Response 400 (application/json)
++ Response 404 (application/json)
   {
-    "status": 400,
+    "status": 404,
     "message": "No group found with this ID"
-  }
-
-+ Response 400 (application/json)
-  {
-    "status": 400,
-    "message": "To delete a role group, all group members should be removed"
   }
 
 + Response 200 (application/json)

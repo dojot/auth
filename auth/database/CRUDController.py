@@ -166,7 +166,6 @@ def getPerm(dbSession, permissionId: int):
 def updatePerm(dbSession, permissionId: int, permData):
     permData = {k: permData[k] for k in permData if k in Permission.fillable}
     checkPerm(permData)
-    print(permData)
     updated = dbSession.query(Permission).filter_by(id=permissionId) \
             .update(permData)
     if (updated == 0):
