@@ -13,6 +13,7 @@ import json
 
 import conf
 import database.CRUDController as crud
+import database.RelationshipController as rship
 import authentication as auth
 import kongUtils as kong
 from flaskAlchemyInit import app, db, formatResponse, HTTPRequestError, \
@@ -214,6 +215,43 @@ def deleteGroup(groupId):
     try:
         crud.getGroup(db.session, int(groupId))
         crud.deleteGroup(db.session, int(groupId))
+        db.session.commit()
+        return formatResponse(200)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+
+@app.route('/pap/ship/usergroup/<user>/<group>', methods=['POST', 'DELETE'])
+def addUserToGroup(user,group):
+    try:
+        if request.method == 'POST':
+            rship.addUserGroup(db.session, user, group)
+        else:
+            rship.removeUserGroup(db.session, user, group)
+        db.session.commit()
+        return formatResponse(200)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+
+
+@app.route('/pap/ship/grouppermissions/<group>/<permissionid>', methods=['POST', 'DELETE'])
+def addGroupPermission(group, permissionid):
+    try:
+        if request.method == 'POST':
+            rship.addGroupPermission(db.session, group, int(permissionid) )
+        else:
+            rship.removeGroupPermission(db.session, group, int(permissionid) )
+        db.session.commit()
+        return formatResponse(200)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+
+@app.route('/pap/ship/userpermissions/<user>/<permissionid>', methods=['POST', 'DELETE'])
+def addUserPermission(user, permissionid):
+    try:
+        if request.method == 'POST':
+            rship.addUserPermission(db.session, user, int(permissionid) )
+        else:
+            rship.removeUserPermission(db.session, user, int(permissionid) )
         db.session.commit()
         return formatResponse(200)
     except HTTPRequestError as err:
