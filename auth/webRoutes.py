@@ -114,7 +114,7 @@ def removeUser(userid):
         return formatResponse(err.errorCode, err.message)
 
 # Permission CRUD
-@app.route('/pap/crud/permission', methods=['POST'])
+@app.route('/pap/permission', methods=['POST'])
 def createPermission():
     try:
         permData = loadJsonFromRequest(request)
@@ -125,7 +125,7 @@ def createPermission():
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/permission', methods=['GET'])
+@app.route('/pap/permission', methods=['GET'])
 def listPermissions():
     try:
         permissions = crud.searchPerm(db.session, \
@@ -139,7 +139,7 @@ def listPermissions():
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/permission/<permid>', methods=['GET'])
+@app.route('/pap/permission/<permid>', methods=['GET'])
 def getPermission(permid):
     try:
         perm = crud.getPerm(db.session, int(permid))
@@ -147,7 +147,7 @@ def getPermission(permid):
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/permission/<permid>', methods=['PUT'])
+@app.route('/pap/permission/<permid>', methods=['PUT'])
 def updatePermission(permid):
     try:
         permData = loadJsonFromRequest(request)
@@ -157,7 +157,7 @@ def updatePermission(permid):
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/permission/<permid>', methods=['DELETE'])
+@app.route('/pap/permission/<permid>', methods=['DELETE'])
 def deletePermission(permid):
     try:
         crud.getPerm(db.session, int(permid))
@@ -168,7 +168,7 @@ def deletePermission(permid):
         return formatResponse(err.errorCode, err.message)
 
 # Group CRUD
-@app.route('/pap/crud/group', methods=['POST'])
+@app.route('/pap/group', methods=['POST'])
 def createGroup():
     try:
         groupData = loadJsonFromRequest(request)
@@ -179,7 +179,7 @@ def createGroup():
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/group', methods=['GET'])
+@app.route('/pap/group', methods=['GET'])
 def listGroup():
     try:
         groups = crud.searchGroup(db.session, \
@@ -191,7 +191,7 @@ def listGroup():
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/group/<groupId>', methods=['GET'])
+@app.route('/pap/group/<groupId>', methods=['GET'])
 def getGroup(groupId):
     try:
         group = crud.getGroup(db.session, int(groupId))
@@ -199,7 +199,7 @@ def getGroup(groupId):
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/group/<groupId>', methods=['PUT'])
+@app.route('/pap/group/<groupId>', methods=['PUT'])
 def updateGroup(groupId):
     try:
         groupData = loadJsonFromRequest(request)
@@ -209,7 +209,7 @@ def updateGroup(groupId):
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
-@app.route('/pap/crud/group/<groupId>', methods=['DELETE'])
+@app.route('/pap/group/<groupId>', methods=['DELETE'])
 def deleteGroup(groupId):
     try:
         crud.getGroup(db.session, int(groupId))
