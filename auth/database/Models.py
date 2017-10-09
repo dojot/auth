@@ -85,7 +85,7 @@ class User(db.Model):
     # Table Relationships
     permissions = relationship('Permission',
                                secondary='user_permission',
-                               ascade="delete")
+                               cascade="delete")
     groups = relationship('Group', secondary='user_group', cascade="delete")
 
 

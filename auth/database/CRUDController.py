@@ -15,10 +15,11 @@ def checkUser(user, ignore=[]):
     if 'username' not in user.keys() or len(user['username']) == 0:
         raise HTTPRequestError(400, "Missing username")
 
-    if re.match(r'^[a-z0-9_]+$', user['username']) is None:
+    if re.match(r'^[a-z]+[a-z0-9_]', user['username']) is None:
         raise HTTPRequestError(400,
-                               'Invalid username, only lowercase'
-                               ' alhpanumeric and underscores allowed')
+                               'Invalid username. usernames should start with'
+                               ' a letter and only lowercase,'
+                               ' alhpanumeric and underscores are allowed')
 
     if ('passwd' not in ignore) and (
                                         'passwd' not in user.keys()

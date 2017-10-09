@@ -29,8 +29,6 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-db.create_all()
-
 
 class HTTPRequestError(Exception):
     def __init__(self, errorCode, message):
