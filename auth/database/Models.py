@@ -107,6 +107,9 @@ class Group(db.Model):
         except ValueError:
             return db.session.query(Group).filter_by(name=nameOrId).one()
 
+    def safeDict(self):
+        return self.as_dict()
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False)
     description = Column(String, nullable=True)
