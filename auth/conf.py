@@ -1,5 +1,5 @@
-#this file contains the default configuration values
-#and confiuration retrivement functions
+# This file contains the default configuration values
+# and confiuration retrivement functions
 
 import os
 
@@ -29,10 +29,10 @@ except KeyError:
 try:
     kongURL = os.environ['KONG_URL']
 except KeyError:
-    kongURL = 'http://localhost:8001' #'http://kong:8001'
+    kongURL = 'http://localhost:8001'   # 'http://kong:8001'
 
 # JWT token related configuration
 try:
-    tokenExpiration = int( os.environ['TOKEN_EXP'] )
+    tokenExpiration = int(os.environ['TOKEN_EXP'])
 except KeyError:
-    tokenExpiration =  420
+    tokenExpiration = 420

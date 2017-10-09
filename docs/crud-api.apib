@@ -6,7 +6,7 @@ Endpoints to perform permissions, groups and profiles management
 
 # Group CRUD Permissions and Group
 
-## Permissions creation and search [/pap/crud/permission]
+## Permissions creation and search [/pap/permission]
 ### Create a new permission [POST]
 notice that regular expressions can be used on the 'path' and 'method' fields.
 
@@ -55,7 +55,7 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
       ]
     }
 
-## Permissions management [/pap/crud/permission/<id>]
+## Permissions management [/pap/permission/<id>]
 ### Get a permission [GET]
 + Response 404 (application/json)
   {
@@ -106,7 +106,7 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
   }
 
 
-## Group creation [/pap/crud/group]
+## Group creation [/pap/group]
 ### Create a new group [POST]
 
 + Request (application/json)
@@ -156,7 +156,7 @@ notice that regular expressions can be used on the 'path' and 'method' fields.
       ]
     }
 
-## Group management [/pap/crud/group/<id>]
+## Group management [/pap/group/<id>]
 ### Get a group [GET]
 + Response 404 (application/json)
   {
