@@ -12,6 +12,7 @@ import json
 import conf
 import database.CRUDController as crud
 import database.RelationshipController as rship
+import database.PDPController as pdpc
 import authentication as auth
 import kongUtils as kong
 from flaskAlchemyInit import app, db, formatResponse, HTTPRequestError, \
@@ -293,6 +294,20 @@ def addUserPermission(user, permissionid):
         return formatResponse(200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
+
+
+@app.route('/pdp', methods=['POST'])
+def pdpRequest():
+    try:
+        pdpData = loadJsonFromRequest(request)
+        veredict = pdpc.pdpMain(db.session, pdpData)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        return make_response(json.dumps({
+                                        "veredict": veredict,
+                                        "status": "ok"
+                                        }), 200)
 
 
 if __name__ == '__main__':
