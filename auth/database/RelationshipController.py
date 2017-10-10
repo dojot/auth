@@ -1,7 +1,8 @@
+import sqlalchemy
+
 from database.Models import Permission, User, Group, PermissionEnum
 from database.Models import UserPermission, GroupPermission, UserGroup
 from flaskAlchemyInit import HTTPRequestError
-import sqlalchemy
 
 
 def addUserGroup(dbSession, user, group):
