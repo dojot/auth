@@ -26,8 +26,6 @@ def pdpMain(dbSession, pdpRequest):
     permissions += [perm
                     for group in user.groups
                     for perm in group.permissions]
-    q = dbSession.query(User)
-    print(q)
 
     return makeDecision(permissions, pdpRequest['method'], pdpRequest['path'])
 

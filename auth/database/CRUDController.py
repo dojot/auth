@@ -167,7 +167,18 @@ def checkPerm(perm):
 
     if 'method' not in perm.keys() or len(perm['method']) == 0:
         raise HTTPRequestError(400, "Missing permission method")
-    # TODO: check if path and method are valid regex
+
+    try:
+        re.match(r'(^' + perm['path'] + ')', "")
+    except sre_constants.error:
+        raise HTTPRequestError(perm['method']
+                               + " is not a valid regular expression.")
+
+    try:
+        re.match(r'(^' + perm['path'] + ')', "")
+    except sre_constants.error:
+        raise HTTPRequestError(perm['method']
+                               + " is not a valid regular expression.")
 
 
 def createPerm(dbSession, permission):
