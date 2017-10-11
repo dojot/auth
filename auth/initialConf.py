@@ -88,22 +88,22 @@ def permissionDictHelper(id, path, method, permission=PermissionEnum.permit):
 
 def createPermissions():
     predefPerms = [
-                    permissionDictHelper(1, "/template1/*", "*"),
-                    permissionDictHelper(2, "/template1/*", "GET"),
-                    permissionDictHelper(3, "/device1/*", "*"),
-                    permissionDictHelper(4, "/device1/*", "GET"),
-                    permissionDictHelper(5, "/flows1/*", "*"),
-                    permissionDictHelper(6, "/flows1/*", "GET"),
-                    permissionDictHelper(7, "/history1/*", "*"),
-                    permissionDictHelper(8, "/history1/*", "GET"),
-                    permissionDictHelper(9, "/metric1/*", "*"),
-                    permissionDictHelper(10, "/metric1/*", "GET"),
-                    permissionDictHelper(11, "/mashup1/*", "*"),
-                    permissionDictHelper(12, "/mashup1/*", "GET"),
-                    permissionDictHelper(13, "/auth/user1/*", "*"),
-                    permissionDictHelper(14, "/auth/user1/*", "GET"),
-                    permissionDictHelper(15, "/pap/*", "*"),
-                    permissionDictHelper(16, "/pap/*", "GET")
+                    permissionDictHelper(1, "/template1/(.*)", "(.*)"),
+                    permissionDictHelper(2, "/template1/(.*)", "GET"),
+                    permissionDictHelper(3, "/device1/(.*)", "(.*)"),
+                    permissionDictHelper(4, "/device1/(.*)", "GET"),
+                    permissionDictHelper(5, "/flows1/(.*)", "(.*)"),
+                    permissionDictHelper(6, "/flows1/(.*)", "GET"),
+                    permissionDictHelper(7, "/history1/(.*)", "(.*)"),
+                    permissionDictHelper(8, "/history1/(.*)", "GET"),
+                    permissionDictHelper(9, "/metric1/(.*)", "(.*)"),
+                    permissionDictHelper(10, "/metric1/(.*)", "GET"),
+                    permissionDictHelper(11, "/mashup1/(.*)", "(.*)"),
+                    permissionDictHelper(12, "/mashup1/(.*)", "GET"),
+                    permissionDictHelper(13, "/auth/user1/(.*)", "(.*)"),
+                    permissionDictHelper(14, "/auth/user1/(.*)", "GET"),
+                    permissionDictHelper(15, "/pap/(.*)", "(.*)"),
+                    permissionDictHelper(16, "/pap/(.*)", "GET")
                 ]
 
     for p in predefPerms:
