@@ -22,7 +22,7 @@ class Permission(db.Model):
     # fields that can be filled by user input
     fillable = ['path', 'method', 'permission']
 
-    # serialise
+    # serialize
     def as_dict(self):
         return {
                     c.name: str(getattr(self, c.name))
@@ -50,12 +50,12 @@ class User(db.Model):
     # Fields that can be filled by user input
     fillable = ['name', 'username', 'service', 'email', 'profile']
 
-    # Serialise class as python dictionary
+    # serialize class as python dictionary
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def safeDict(self):
-        # Serialise, but drop sensible fields
+        # serialize, but drop sensible fields
         return {
                 c.name: str(getattr(self, c.name))
                 for c in self.__table__.columns
@@ -72,7 +72,7 @@ class User(db.Model):
     name = Column(String, nullable=False)
     username = Column(String(50), unique=True, nullable=False)
     service = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
     profile = Column(String, nullable=False)
     hash = Column(String, nullable=False)
     salt = Column(String, nullable=False)
@@ -94,7 +94,7 @@ class Group(db.Model):
 
     fillable = ['name', 'description']
 
-    # Serialise class as python dictionary
+    # serialize class as python dictionary
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
