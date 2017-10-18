@@ -10,6 +10,14 @@ LOGGER.setLevel(logging.INFO)
 
 
 def configureKong(user):
+    # Disable Kong not advised. Only use for debug purposes
+    if conf.kongURL == 'DISABLED':
+        return {
+                'key': 'nokey',
+                'secret': 'nosecret',
+                'kongid': 'noid'
+                }
+
     try:
         exists = False
         response = requests.post('%s/consumers' % conf.kongURL,
@@ -44,6 +52,8 @@ def configureKong(user):
 
 # Invalidate old kong shared secret
 def revokeKongSecret(username, tokenId):
+    if conf.kongURL == 'DISABLED':
+        return
     try:
         requests.delete("%s/consumers/%s/jwt/%s"
                         % (conf.kongURL, username, tokenId))
@@ -53,6 +63,8 @@ def revokeKongSecret(username, tokenId):
 
 
 def removeFromKong(user):
+    if conf.kongURL == 'DISABLED':
+        return
     try:
         requests.delete("%s/consumers/%s" % (conf.kongURL, user))
     except ConnectionError:

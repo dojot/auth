@@ -1,4 +1,6 @@
 import re
+import jwt
+import sqlalchemy
 
 from database.Models import Permission, User, Group, PermissionEnum
 from flaskAlchemyInit import HTTPRequestError
@@ -6,28 +8,51 @@ from flaskAlchemyInit import HTTPRequestError
 
 # Helper function to check request fields
 def checkRequest(pdpRequest):
-    if 'method' not in pdpRequest.keys() or len(pdpRequest['method']) == 0:
-        raise HTTPRequestError(400, "Missing method")
+    if 'action' not in pdpRequest.keys() or len(pdpRequest['action']) == 0:
+        raise HTTPRequestError(400, "Missing action")
 
-    if 'username' not in pdpRequest.keys() or len(pdpRequest['username']) == 0:
-        raise HTTPRequestError(400, "Missing username")
+    if 'jwt' not in pdpRequest.keys() or len(pdpRequest['jwt']) == 0:
+        raise HTTPRequestError(400, "Missing JWT")
 
-    if 'path' not in pdpRequest.keys() or len(pdpRequest['path']) == 0:
-        raise HTTPRequestError(400, "Missing path")
+    if 'resource' not in pdpRequest.keys() or len(pdpRequest['resource']) == 0:
+        raise HTTPRequestError(400, "Missing resource")
 
 
 def pdpMain(dbSession, pdpRequest):
     checkRequest(pdpRequest)
-    # TODO: Create a materialised view
-    user = dbSession.query(User). \
-        filter_by(username=pdpRequest['username']).one()
+    try:
+        jwtPayload = jwt.decode(pdpRequest['jwt'], verify=False)
+    except jwt.exceptions.DecodeError:
+        raise HTTPRequestError(400, "Corrupted JWT")
+
+    # TODO: Create a materialised view (or two)
+
+    try:
+        user = dbSession.query(User). \
+                filter_by(id=jwtPayload['userid']).one()
+    except (sqlalchemy.orm.exc.NoResultFound, KeyError):
+        raise HTTPRequestError(400, "Invalid JWT payload")
+
+    # now that we know the user, we know the secret
+    # and can check the jwt signature
+    try:
+        options = {
+            'verify_exp': False,
+        }
+        jwt.decode(pdpRequest['jwt'],
+                   user.secret, algorithm='HS256', options=options)
+    except jwt.exceptions.DecodeError:
+        raise HTTPRequestError(400, "Invalid JWT signaure")
+
     # Get all permissions of this user
     permissions = user.permissions
     permissions += [perm
                     for group in user.groups
                     for perm in group.permissions]
 
-    return makeDecision(permissions, pdpRequest['method'], pdpRequest['path'])
+    return makeDecision(permissions,
+                        pdpRequest['action'],
+                        pdpRequest['resource'])
 
 
 # Receive a list of permissions and try to match the Given
