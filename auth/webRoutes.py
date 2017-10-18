@@ -305,7 +305,7 @@ def pdpRequest():
         return formatResponse(err.errorCode, err.message)
     else:
         return make_response(json.dumps({
-                                        "veredict": veredict,
+                                        "decision": veredict,
                                         "status": "ok"
                                         }), 200)
 

@@ -19,6 +19,7 @@ def authenticate(dbSession, username, passwd):
         raise HTTPRequestError(401, 'not authorized')
 
     if user.hash == crypt(passwd, user.salt, 1000).split('$').pop():
+        groupsId = [g.id for g in user.groups]
 
         claims = {
             'iss': user.key,
@@ -26,12 +27,14 @@ def authenticate(dbSession, username, passwd):
             'exp': int(time.time() + conf.tokenExpiration),
             'name': user.name,
             'email': user.email,
-            'profile': 'admin',
+            'profile': user.profile,  # Obsolete. Kept for compatibility
+            'groups': groupsId,
 
             # Generate a random string as nonce
             'jti': str(binascii.hexlify(os.urandom(16)), 'ascii'),
             'service': user.service,
-            'username': user.username
+            'username': user.username,
+            'userid': user.id
         }
         encoded = jwt.encode(claims, user.secret, algorithm='HS256')
         return str(encoded, 'ascii')

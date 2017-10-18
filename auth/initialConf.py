@@ -14,7 +14,6 @@ import kongUtils as kong
 def createUsers():
     predefusers = [
         {
-            "id": 1,
             "name": "Admin (superuser)",
             "username": "admin",
             "service": "admin",
@@ -29,7 +28,7 @@ def createUsers():
         # if the user exist, chances are this scrip has been run before
         try:
             anotherUser = db.session.query(User.id) \
-                                .filter_by(id=user['id']).one()
+                                .filter_by(username=user['username']).one()
         except sqlalchemy.orm.exc.NoResultFound:
             pass
         else:
@@ -59,12 +58,10 @@ def createUsers():
 def createGroups():
     predefGroups = [
         {
-            "id": 1,
             "name": "admin",
             "description": "Group with the highest access privilege"
         },
         {
-            "id": 2,
             "name": "user",
             "description": "This groups can do anything, except manage users"
         }
@@ -88,20 +85,20 @@ def permissionDictHelper(id, path, method, permission=PermissionEnum.permit):
 
 def createPermissions():
     predefPerms = [
-                    permissionDictHelper(1, "/template1/(.*)", "(.*)"),
-                    permissionDictHelper(2, "/template1/(.*)", "GET"),
-                    permissionDictHelper(3, "/device1/(.*)", "(.*)"),
-                    permissionDictHelper(4, "/device1/(.*)", "GET"),
-                    permissionDictHelper(5, "/flows1/(.*)", "(.*)"),
-                    permissionDictHelper(6, "/flows1/(.*)", "GET"),
-                    permissionDictHelper(7, "/history1/(.*)", "(.*)"),
-                    permissionDictHelper(8, "/history1/(.*)", "GET"),
-                    permissionDictHelper(9, "/metric1/(.*)", "(.*)"),
-                    permissionDictHelper(10, "/metric1/(.*)", "GET"),
-                    permissionDictHelper(11, "/mashup1/(.*)", "(.*)"),
-                    permissionDictHelper(12, "/mashup1/(.*)", "GET"),
-                    permissionDictHelper(13, "/auth/user1/(.*)", "(.*)"),
-                    permissionDictHelper(14, "/auth/user1/(.*)", "GET"),
+                    permissionDictHelper(1, "/template/(.*)", "(.*)"),
+                    permissionDictHelper(2, "/template/(.*)", "GET"),
+                    permissionDictHelper(3, "/device/(.*)", "(.*)"),
+                    permissionDictHelper(4, "/device/(.*)", "GET"),
+                    permissionDictHelper(5, "/flows/(.*)", "(.*)"),
+                    permissionDictHelper(6, "/flows/(.*)", "GET"),
+                    permissionDictHelper(7, "/history/(.*)", "(.*)"),
+                    permissionDictHelper(8, "/history/(.*)", "GET"),
+                    permissionDictHelper(9, "/metric/(.*)", "(.*)"),
+                    permissionDictHelper(10, "/metric/(.*)", "GET"),
+                    permissionDictHelper(11, "/mashup/(.*)", "(.*)"),
+                    permissionDictHelper(12, "/mashup/(.*)", "GET"),
+                    permissionDictHelper(13, "/auth/user/(.*)", "(.*)"),
+                    permissionDictHelper(14, "/auth/user/(.*)", "GET"),
                     permissionDictHelper(15, "/pap/(.*)", "(.*)"),
                     permissionDictHelper(16, "/pap/(.*)", "GET")
                 ]
