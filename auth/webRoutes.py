@@ -311,4 +311,7 @@ def pdpRequest():
 
 
 if __name__ == '__main__':
+    # from database.Models import MVUserPermission, MVGroupPermission
+    # MVUserPermission.refresh()
+    # db.session.commit()
     app.run(host='0.0.0.0', threaded=True)
