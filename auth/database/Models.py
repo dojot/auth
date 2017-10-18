@@ -7,9 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 import enum
 
 import conf as dbconf
-from flaskAlchemyInit import app, db
-from database.materialized_view_factory import create_mat_view
-from database.materialized_view_factory import refresh_mat_view
+from .flaskAlchemyInit import app, db
+from .materialized_view_factory import create_mat_view
+from .materialized_view_factory import refresh_mat_view
 
 
 class PermissionEnum(enum.Enum):

@@ -4,7 +4,8 @@ import sqlalchemy
 
 from database.Models import Permission, User, Group, PermissionEnum
 from database.Models import MVUserPermission, MVGroupPermission
-from flaskAlchemyInit import HTTPRequestError
+from database.flaskAlchemyInit import HTTPRequestError
+import conf
 
 
 # Helper function to check request fields
@@ -30,20 +31,21 @@ def pdpMain(dbSession, pdpRequest):
 
     try:
         user = dbSession.query(User). \
-                filter_by(id=jwtPayload['userid']).one()
+                filter_by(username=jwtPayload['username']).one()
     except (sqlalchemy.orm.exc.NoResultFound, KeyError):
         raise HTTPRequestError(400, "Invalid JWT payload")
 
     # now that we know the user, we know the secret
     # and can check the jwt signature
-    try:
-        options = {
-            'verify_exp': False,
-        }
-        jwt.decode(pdpRequest['jwt'],
-                   user.secret, algorithm='HS256', options=options)
-    except jwt.exceptions.DecodeError:
-        raise HTTPRequestError(400, "Invalid JWT signaure")
+    if conf.kongURL != 'DISABLED':
+        try:
+            options = {
+                'verify_exp': False,
+            }
+            jwt.decode(pdpRequest['jwt'],
+                       user.secret, algorithm='HS256', options=options)
+        except jwt.exceptions.DecodeError:
+            raise HTTPRequestError(400, "Invalid JWT signaure")
 
     # check user direct permissions
     for p in MVUserPermission.query.filter_by(user_id=user.id):

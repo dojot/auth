@@ -7,7 +7,7 @@ import sqlalchemy
 from pbkdf2 import crypt
 import os
 
-from flaskAlchemyInit import HTTPRequestError
+from database.flaskAlchemyInit import HTTPRequestError
 from database.Models import User
 import conf
 
@@ -41,8 +41,7 @@ def authenticate(dbSession, authData):
             # Generate a random string as nonce
             'jti': str(binascii.hexlify(os.urandom(16)), 'ascii'),
             'service': user.service,
-            'username': user.username,
-            'userid': user.id
+            'username': user.username
         }
         encoded = jwt.encode(claims, user.secret, algorithm='HS256')
         return str(encoded, 'ascii')

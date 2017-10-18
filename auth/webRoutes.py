@@ -10,13 +10,13 @@ from flask import request
 import json
 
 import conf
-import database.CRUDController as crud
-import database.RelationshipController as rship
-import database.PDPController as pdpc
-import authentication as auth
+import controller.CRUDController as crud
+import controller.RelationshipController as rship
+import controller.PDPController as pdpc
+import controller.AuthenticationController as auth
 import kongUtils as kong
-from flaskAlchemyInit import app, db, formatResponse, HTTPRequestError, \
-                             make_response, loadJsonFromRequest
+from database.flaskAlchemyInit import app, db, formatResponse, \
+                        HTTPRequestError, make_response, loadJsonFromRequest
 from database.Models import MVUserPermission, MVGroupPermission
 
 
