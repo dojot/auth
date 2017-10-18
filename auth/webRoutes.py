@@ -17,6 +17,7 @@ import authentication as auth
 import kongUtils as kong
 from flaskAlchemyInit import app, db, formatResponse, HTTPRequestError, \
                              make_response, loadJsonFromRequest
+from database.Models import MVUserPermission, MVGroupPermission
 
 
 # Authenticion endpoint
@@ -120,6 +121,8 @@ def removeUser(userid):
         old_user = crud.getUser(db.session, int(userid))
         kong.removeFromKong(old_user.username)
         crud.deleteUser(db.session, int(userid))
+        MVUserPermission.refresh()
+        MVGroupPermission.refresh()
         db.session.commit()
         return formatResponse(200, "User removed")
     except HTTPRequestError as err:
@@ -188,6 +191,8 @@ def deletePermission(permid):
         crud.getPerm(db.session, int(permid))
         crud.deletePerm(db.session, int(permid))
         db.session.commit()
+        MVUserPermission.refresh()
+        MVGroupPermission.refresh()
         return formatResponse(200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
@@ -249,6 +254,7 @@ def deleteGroup(groupId):
     try:
         crud.getGroup(db.session, int(groupId))
         crud.deleteGroup(db.session, int(groupId))
+        MVGroupPermission.refresh()
         db.session.commit()
         return formatResponse(200)
     except HTTPRequestError as err:
@@ -276,6 +282,7 @@ def addGroupPermission(group, permissionid):
             rship.addGroupPermission(db.session, group, int(permissionid))
         else:
             rship.removeGroupPermission(db.session, group, int(permissionid))
+        MVGroupPermission.refresh()
         db.session.commit()
         return formatResponse(200)
     except HTTPRequestError as err:
@@ -290,6 +297,7 @@ def addUserPermission(user, permissionid):
             rship.addUserPermission(db.session, user, int(permissionid))
         else:
             rship.removeUserPermission(db.session, user, int(permissionid))
+        MVUserPermission.refresh()
         db.session.commit()
         return formatResponse(200)
     except HTTPRequestError as err:
@@ -311,7 +319,4 @@ def pdpRequest():
 
 
 if __name__ == '__main__':
-    # from database.Models import MVUserPermission, MVGroupPermission
-    # MVUserPermission.refresh()
-    # db.session.commit()
     app.run(host='0.0.0.0', threaded=True)
