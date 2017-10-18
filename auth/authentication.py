@@ -12,7 +12,15 @@ from database.Models import User
 import conf
 
 
-def authenticate(dbSession, username, passwd):
+def authenticate(dbSession, authData):
+    if 'username' not in authData.keys():
+        raise HTTPRequestError(400, 'missing username')
+    if 'passwd' not in authData.keys():
+        raise HTTPRequestError(400, 'missing passwd')
+
+    username = authData['username']
+    passwd = authData['passwd']
+
     try:
         user = dbSession.query(User).filter_by(username=username.lower()).one()
     except sqlalchemy.orm.exc.NoResultFound:

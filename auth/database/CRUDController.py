@@ -145,6 +145,12 @@ def updateUser(dbSession, userId: int, updatedInfo):
 def deleteUser(dbSession, userId: int):
     try:
         user = dbSession.query(User).filter_by(id=userId).one()
+        db.session.execute(
+            UserPermission.__table__.delete(UserPermission.user_id=user.id)
+        )
+        db.session.execute(
+            UserGroup.__table__.delete(UserGroup.user_id=user.id)
+        )
         dbSession.delete(user)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No user found with this ID")
@@ -232,6 +238,14 @@ def updatePerm(dbSession, permissionId: int, permData):
 def deletePerm(dbSession, permissionId):
     try:
         perm = dbSession.query(Permission).filter_by(id=permissionId).one()
+        db.session.execute(
+            UserPermission.__table__
+            .delete(UserPermission.permission_id=perm.id)
+        )
+        db.session.execute(
+            GroupPermission.__table__
+            .delete(GroupPermission.permission_id=perm.id)
+        )
         dbSession.delete(perm)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No permission found with this ID")
@@ -294,6 +308,14 @@ def updateGroup(dbSession, groupId: int, groupData):
 def deleteGroup(dbSession, groupId: int):
     try:
         group = dbSession.query(Group).filter_by(id=groupId).one()
+        db.session.execute(
+            GroupPermission.__table__
+            .delete(GroupPermission.group_id=group.id)
+        )
+        db.session.execute(
+            UserGroup.__table__
+            .delete(UserGroup.group_id=group.id)
+        )
         dbSession.delete(group)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No group found with this ID")

@@ -39,10 +39,9 @@ class Permission(db.Model):
     path = Column(String, nullable=False)
     method = Column(String(30), nullable=False)
     permission = Column(Enum(PermissionEnum), nullable=False)
-    users = relationship('User', secondary='user_permission', cascade="delete")
+    users = relationship('User', secondary='user_permission')
     groups = relationship('Group',
-                          secondary='group_permission',
-                          cascade="delete")
+                          secondary='group_permission')
 
 
 class User(db.Model):
@@ -87,9 +86,8 @@ class User(db.Model):
 
     # Table Relationships
     permissions = relationship('Permission',
-                               secondary='user_permission',
-                               cascade="delete")
-    groups = relationship('Group', secondary='user_group', cascade="delete")
+                               secondary='user_permission')
+    groups = relationship('Group', secondary='user_group')
 
 
 class Group(db.Model):
@@ -119,9 +117,8 @@ class Group(db.Model):
 
     # Table ralationships
     permissions = relationship('Permission',
-                               secondary='group_permission',
-                               cascade="delete")
-    users = relationship('User', secondary='user_group', cascade="delete")
+                               secondary='group_permission')
+    users = relationship('User', secondary='user_group')
 
 
 class UserPermission(db.Model):

@@ -25,17 +25,8 @@ from database.Models import MVUserPermission, MVGroupPermission
 def authenticate():
     try:
         authData = loadJsonFromRequest(request)
-        if 'username' not in authData.keys():
-            return formatResponse(400, 'missing username')
-        if 'passwd' not in authData.keys():
-            return formatResponse(400, 'missing passwd')
-
-        jwt = auth.authenticate(db.session,
-                                authData['username'],
-                                authData['passwd'])
-
+        jwt = auth.authenticate(db.session, authData)
         return make_response(json.dumps({'jwt': jwt}), 200)
-
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
