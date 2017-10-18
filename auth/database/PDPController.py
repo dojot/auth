@@ -3,6 +3,7 @@ import jwt
 import sqlalchemy
 
 from database.Models import Permission, User, Group, PermissionEnum
+from database.Models import MVUserPermission, MVGroupPermission
 from flaskAlchemyInit import HTTPRequestError
 
 
@@ -44,27 +45,30 @@ def pdpMain(dbSession, pdpRequest):
     except jwt.exceptions.DecodeError:
         raise HTTPRequestError(400, "Invalid JWT signaure")
 
-    # Get all permissions of this user
-    permissions = user.permissions
-    permissions += [perm
-                    for group in user.groups
-                    for perm in group.permissions]
+    # check user direct permissions
+    for p in MVUserPermission.query.filter_by(user_id=user.id):
+        granted = makeDecision(p, pdpRequest['action'], pdpRequest['resource'])
+        if granted != PermissionEnum.notApplicable:
+            return granted.value
 
-    return makeDecision(permissions,
-                        pdpRequest['action'],
-                        pdpRequest['resource'])
+    # chekc user group permissions
+    for g in jwtPayload['groups']:
+        for p in MVGroupPermission.query.filter_by(group_id=g):
+            granted = makeDecision(p,
+                                   pdpRequest['action'],
+                                   pdpRequest['resource'])
+            if granted != PermissionEnum.notApplicable:
+                return granted.value
+
+    return PermissionEnum.deny.value
 
 
-# Receive a list of permissions and try to match the Given
-# path + method with one. Return 'deny' or 'permit'
-def makeDecision(permissionList, method, path):
-    for p in permissionList:
-        # if the Path and method Match
-        if re.match(r'(^' + p.path + ')', path) is not None:
-            # This case is so common that worth the separate if
-            # TODO: return first match is OK?
-            if p.method == '*':
-                return p.permission.value
-            if re.match(r'(^' + p.method + ')', method):
-                return p.permission.value
-    return 'deny'
+# Receive a permissions and try to match the Given
+# path + method with it. Return 'permit' or 'deny' if succed matching.
+# return 'notApplicable' otherwise
+def makeDecision(permission, method, path):
+    # if the Path and method Match
+    if re.match(r'(^' + permission.path + ')', path) is not None:
+        if re.match(r'(^' + permission.method + ')', method):
+            return permission.permission
+    return PermissionEnum.notApplicable
