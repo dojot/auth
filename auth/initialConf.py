@@ -5,9 +5,11 @@ import os
 from pbkdf2 import crypt
 import sqlalchemy
 
-from flaskAlchemyInit import db
+from database.flaskAlchemyInit import db
 from database.Models import Permission, User, Group, PermissionEnum
 from database.Models import UserPermission, GroupPermission, UserGroup
+from database.Models import MVUserPermission, MVGroupPermission
+
 import kongUtils as kong
 
 
@@ -156,6 +158,11 @@ def populate():
     createPermissions()
     addPermissionsGroup()
     addUserGroups()
+
+    # refresh views
+    MVUserPermission.refresh()
+    MVGroupPermission.refresh()
+    db.session.commit()
 
 
 populate()

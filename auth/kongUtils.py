@@ -1,8 +1,9 @@
 import logging
 import requests
 from requests import ConnectionError
+
 import conf
-from flaskAlchemyInit import HTTPRequestError
+from database.flaskAlchemyInit import HTTPRequestError
 
 LOGGER = logging.getLogger('device-manager.' + __name__)
 LOGGER.addHandler(logging.StreamHandler())
