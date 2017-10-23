@@ -14,6 +14,7 @@ import controller.CRUDController as crud
 import controller.RelationshipController as rship
 import controller.PDPController as pdpc
 import controller.AuthenticationController as auth
+import controller.ReportController as reports
 import kongUtils as kong
 from database.flaskAlchemyInit import app, db, formatResponse, \
                         HTTPRequestError, make_response, loadJsonFromRequest
@@ -308,6 +309,65 @@ def pdpRequest():
                                         "status": "ok"
                                         }), 200)
 
+
+#  Reports endpoints
+@app.route('/pap/user/<user>/directpermissions', methods=['GET'])
+def getUserDiectPermissions(user):
+    try:
+        permissions = reports.getUserDiectPermissions(db.session, user)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        permissionsSafe = list(map(lambda p: p.safeDict(), permissions))
+        return make_response(json.dumps({
+                                        "permissions": permissionsSafe
+                                        }), 200)
+
+
+@app.route('/pap/user/<user>/allpermissions', methods=['GET'])
+def getAllUserPermissions(user):
+    try:
+        permissions = reports.getAllUserPermissions(db.session, user)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        permissionsSafe = list(map(lambda p: p.safeDict(), permissions))
+        return make_response(json.dumps({
+                                        "permissions": permissionsSafe
+                                        }), 200)
+
+
+@app.route('/pap/user/<user>/groups', methods=['GET'])
+def getUserGrups(user):
+    try:
+        groups = reports.getUserGrups(db.session, user)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        groupsSafe = list(map(lambda p: p.safeDict(), groups))
+        return make_response(json.dumps({"groups": groupsSafe}), 200)
+
+
+@app.route('/pap/group/<group>/permissions', methods=['GET'])
+def getGroupPermissions(group):
+    try:
+        permissions = reports.getGroupPermissions(db.session, group)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        permissionsSafe = list(map(lambda p: p.safeDict(), permissions))
+        return make_response(json.dumps({"permissions": permissionsSafe}), 200)
+
+
+@app.route('/pap/group/<group>/users', methods=['GET'])
+def getGroupUsers(group):
+    try:
+        users = reports.getGroupUsers(db.session, group)
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        usersSafe = list(map(lambda p: p.safeDict(), users))
+        return make_response(json.dumps({"users": usersSafe}), 200)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', threaded=True)

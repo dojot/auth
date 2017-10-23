@@ -27,10 +27,12 @@ class Permission(db.Model):
 
     # serialize
     def as_dict(self):
-        return {
-                    c.name: str(getattr(self, c.name))
+        tmpDict = {
+                    c.name: getattr(self, c.name)
                     for c in self.__table__.columns
-                }
+                  }
+        tmpDict['permission'] = tmpDict['permission'].value
+        return tmpDict
 
     def safeDict(self):
         return self.as_dict()
