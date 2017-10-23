@@ -37,6 +37,7 @@ def authenticate(dbSession, authData):
             'email': user.email,
             'profile': user.profile,  # Obsolete. Kept for compatibility
             'groups': groupsId,
+            'userid': user.id,
 
             # Generate a random string as nonce
             'jti': str(binascii.hexlify(os.urandom(16)), 'ascii'),

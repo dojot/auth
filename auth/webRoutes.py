@@ -369,5 +369,6 @@ def getGroupUsers(group):
         usersSafe = list(map(lambda p: p.safeDict(), users))
         return make_response(json.dumps({"users": usersSafe}), 200)
 
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', threaded=True)
