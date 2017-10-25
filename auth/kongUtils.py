@@ -1,5 +1,7 @@
 import logging
 import requests
+import binascii
+import os
 from requests import ConnectionError
 
 import conf
@@ -15,7 +17,7 @@ def configureKong(user):
     if conf.kongURL == 'DISABLED':
         return {
                 'key': 'nokey',
-                'secret': 'nosecret',
+                'secret': str(binascii.hexlify(os.urandom(16)), 'ascii'),
                 'kongid': 'noid'
                 }
 

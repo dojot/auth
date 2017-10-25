@@ -11,17 +11,30 @@ if (conf.cacheName == 'redis'):
                              charset="utf-8", decode_responses=True)
 
 elif (conf.cacheName == 'NOCACHE'):
+    print("Warning. Cache policy set to NOCACHE."
+          "This may degrade PDP perfomance.")
     redis_store = None
 
 else:
-    print("Currently, there is no suport for database " + dbconf.dbName)
+    print("Currently, there is no suport for cache policy " + conf.dbName)
     exit(-1)
 
 
 # create a cache key
-def generateKey(*args):
+def generateKey(userid, action, resource):
     # add a prefix to every key, to avoid colision with others aplications
-    key = 'PDP'
-    for w in args:
-        key += ';' + str(w)
+    key = 'PDP;'
+    key += str(userid) + ';' + action + ';' + resource
     return key
+
+
+# invalidate a key. may use regex patterns
+def deleteKey(userid='*', action='*', resource='*'):
+    if redis_store:
+        # RE and Redis use diferent wildcard representations
+        action = action.replace('(.*)', '*')
+        resource = resource.replace('(.*)', '*')
+        # TODO: put the cache update on a worker threaded
+        key = generateKey(userid, action, resource)
+        for dkey in redis_store.scan_iter(key):
+            redis_store.delete(dkey)

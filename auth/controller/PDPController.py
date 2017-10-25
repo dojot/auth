@@ -1,11 +1,11 @@
 import re
-import jwt
 import sqlalchemy
 
 import conf
 from database.Models import Permission, User, Group, PermissionEnum
 from database.Models import MVUserPermission, MVGroupPermission
 from database.flaskAlchemyInit import HTTPRequestError, app
+from controller.AuthenticationController import getJwtPayload
 import database.Cache as cache
 
 
@@ -23,35 +23,14 @@ def checkRequest(pdpRequest):
 
 def pdpMain(dbSession, pdpRequest):
     checkRequest(pdpRequest)
-    try:
-        jwtPayload = jwt.decode(pdpRequest['jwt'], verify=False)
-    except jwt.exceptions.DecodeError:
-        raise HTTPRequestError(401, "Corrupted JWT")
-
-    try:
-        user_id = jwtPayload['userid']
-    except ():
-        raise HTTPRequestError(401, "Invalid JWT payload")
-
-    # now that we know the user, we know the secret
-    # and can check the jwt signature
-    if conf.checkJWTSign:
-        try:
-            user = dbSession.query(User). \
-                    filter_by(user_id=jwtPayload['userid']).one()
-            options = {
-                'verify_exp': False,
-            }
-            jwt.decode(pdpRequest['jwt'],
-                       user.secret, algorithm='HS256', options=options)
-        except (jwt.exceptions.DecodeError, sqlalchemy.orm.exc.NoResultFound):
-            raise HTTPRequestError(401, "Invalid JWT signaure")
+    jwtPayload = getJwtPayload(pdpRequest['jwt'])
+    user_id = jwtPayload['userid']
 
     if cache.redis_store:
         cachedVeredict = cache.redis_store. \
                         get(cache.generateKey(user_id, pdpRequest['action'],
                                               pdpRequest['resource']))
-
+        # return the cached awnser if it exist
         if cachedVeredict:
             return cachedVeredict
 
@@ -66,7 +45,7 @@ def pdpMain(dbSession, pdpRequest):
                                                   pdpRequest['resource']
                                                   ),
                                 str(veredict),
-                                30   # time to live
+                                conf.cacheTtl   # time to live
                                 )
     return veredict
 
@@ -104,5 +83,6 @@ def makeDecision(permission, method, path):
     # if the Path and method Match
     if re.match(r'(^' + permission.path + ')', path) is not None:
         if re.match(r'(^' + permission.method + ')', method):
+            print("match permission " + str(permission.id))
             return permission.permission
     return PermissionEnum.notApplicable

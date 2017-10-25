@@ -10,11 +10,13 @@ dbUser = os.environ.get("AUTH_DB_USER", "auth")
 dbPdw = os.environ.get("AUTH_DB_PWD", "")
 dbHost = os.environ.get("AUTH_DB_HOST", "postgres")
 
+
 # cache related configuration
 cacheName = os.environ.get("AUTH_CACHE_NAME", "redis")
 cacheUser = os.environ.get("AUTH_CACHE_USER", "redis")
 cachePdw = os.environ.get("AUTH_CACHE_PWD", "")
 cacheHost = os.environ.get("AUTH_CACHE_HOST", "redis")
+cacheTtl = int(os.environ.get("AUTH_CACHE_TTL", 720))
 
 # kong related configuration
 kongURL = os.environ.get("AUTH_KONG_URL", "http://kong:8001")
