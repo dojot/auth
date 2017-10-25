@@ -52,7 +52,7 @@ def addGroupPermission(dbSession, group, permissionId):
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No group found with this ID or name")
     try:
-        perm = dbSession.query(Permission.id).filter_by(id=permissionId).one()
+        perm = dbSession.query(Permission).filter_by(id=permissionId).one()
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No permission found with this ID")
     try:
@@ -62,7 +62,7 @@ def addGroupPermission(dbSession, group, permissionId):
         r = GroupPermission(group_id=group.id, permission_id=permissionId)
         dbSession.add(r)
         cache.deleteKey(action=perm.method,
-                        resource=perm.resource)
+                        resource=perm.path)
     else:
         raise HTTPRequestError(409, "Group already have this permission")
 
@@ -73,7 +73,7 @@ def removeGroupPermission(dbSession, group, permissionId):
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No group found with this ID or name")
     try:
-        perm = dbSession.query(Permission.id).filter_by(id=permissionId).one()
+        perm = dbSession.query(Permission).filter_by(id=permissionId).one()
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No permission found with this ID")
     try:
@@ -81,7 +81,7 @@ def removeGroupPermission(dbSession, group, permissionId):
             .filter_by(group_id=group.id, permission_id=permissionId).one()
         dbSession.delete(relation)
         cache.deleteKey(action=perm.method,
-                        resource=perm.resource)
+                        resource=perm.path)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "Group does not have this permission")
 
@@ -92,7 +92,7 @@ def addUserPermission(dbSession, user, permissionId):
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No user found with this ID or name")
     try:
-        perm = dbSession.query(Permission.id).filter_by(id=permissionId).one()
+        perm = dbSession.query(Permission).filter_by(id=permissionId).one()
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No permission found with this ID")
     try:
@@ -103,7 +103,7 @@ def addUserPermission(dbSession, user, permissionId):
         dbSession.add(r)
         cache.deleteKey(userid=user.id,
                         action=perm.method,
-                        resource=perm.resource)
+                        resource=perm.path)
     else:
         raise HTTPRequestError(409, "User already have this permission")
 
@@ -114,7 +114,7 @@ def removeUserPermission(dbSession, user, permissionId):
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No user found with this ID or name")
     try:
-        perm = dbSession.query(Permission.id).filter_by(id=permissionId).one()
+        perm = dbSession.query(Permission).filter_by(id=permissionId).one()
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No permission found with this ID")
     try:
@@ -123,6 +123,6 @@ def removeUserPermission(dbSession, user, permissionId):
         dbSession.delete(relation)
         cache.deleteKey(userid=user.id,
                         action=perm.method,
-                        resource=perm.resource)
+                        resource=perm.path)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "User does not have this permission")
