@@ -26,27 +26,23 @@ def pdpMain(dbSession, pdpRequest):
     jwtPayload = getJwtPayload(pdpRequest['jwt'])
     user_id = jwtPayload['userid']
 
-    if cache.redis_store:
-        cachedVeredict = cache.redis_store. \
-                        get(cache.generateKey(user_id, pdpRequest['action'],
-                                              pdpRequest['resource']))
-        # return the cached awnser if it exist
-        if cachedVeredict:
-            return cachedVeredict
+    # try to retrieve the veredict from cache
+    cachedVeredict = cache.getKey(user_id, pdpRequest['action'],
+                                  pdpRequest['resource'])
+    # Return the cached answer if it exist
+    if cachedVeredict:
+        return cachedVeredict
 
     veredict = iteratePermissions(user_id,
                                   jwtPayload['groups'],
                                   pdpRequest['action'],
                                   pdpRequest['resource'])
-    # if Redis cache is ative, registry this veredict
-    if cache.redis_store:
-        cache.redis_store.setex(cache.generateKey(user_id,
-                                                  pdpRequest['action'],
-                                                  pdpRequest['resource']
-                                                  ),
-                                str(veredict),
-                                conf.cacheTtl   # time to live
-                                )
+    # Registry this veredict on cache
+    cache.setKey(user_id,
+                 pdpRequest['action'],
+                 pdpRequest['resource'],
+                 veredict)
+
     return veredict
 
 
