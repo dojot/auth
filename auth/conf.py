@@ -17,6 +17,7 @@ cacheUser = os.environ.get("AUTH_CACHE_USER", "redis")
 cachePdw = os.environ.get("AUTH_CACHE_PWD", "")
 cacheHost = os.environ.get("AUTH_CACHE_HOST", "redis")
 cacheTtl = int(os.environ.get("AUTH_CACHE_TTL", 720))
+cacheDatabase = os.environ.get("AUTH_CACHE_DATABASE", "0")
 
 # kong related configuration
 kongURL = os.environ.get("AUTH_KONG_URL", "http://kong:8001")

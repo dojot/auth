@@ -2,14 +2,19 @@
 # powered by flask-redis: https://github.com/underyx/flask-redis
 import conf
 from .flaskAlchemyInit import app, db
+from flask_redis import FlaskRedis
+
+# redis.exceptions.ConnectionError
 
 if (conf.cacheName == 'redis'):
-    from flask_redis import FlaskRedis
     REDIS_URL = ('redis://' + conf.cacheUser + ':' + conf.cachePdw
-                 + '@localhost:6379/0' + conf.cacheHost)
-    redis_store = FlaskRedis(app, strict=False,
+                 + '@' + conf.cacheHost + ':6379/' + conf.cacheDatabase)
+    app.config['DBA_URL'] = REDIS_URL
+    redis_store = FlaskRedis(app, config_prefix='DBA', strict=False,
+                             encoding="utf-8",
                              charset="utf-8", decode_responses=True)
 
+# socket_keepalive socket_keepalive_options
 elif (conf.cacheName == 'NOCACHE'):
     print("Warning. Cache policy set to NOCACHE."
           "This may degrade PDP perfomance.")
