@@ -48,10 +48,10 @@ def getKey(userid, action, resource):
 def setKey(userid, action, resource, veredict):
     try:
         redis_store.setex(generateKey(
-                                                            userid,
-                                                            action,
-                                                            resource
-                                                        ),
+                                        userid,
+                                        action,
+                                        resource
+                                      ),
                           str(veredict),
                           conf.cacheTtl   # time to live
                           )
@@ -62,7 +62,7 @@ def setKey(userid, action, resource, veredict):
 # invalidate a key. may use regex patterns
 def deleteKey(userid='*', action='*', resource='*'):
     if redis_store:
-        # RE and Redis use diferent wildcard representations
+        # python-RE and Redis use diferent wildcard representations
         action = action.replace('(.*)', '*')
         resource = resource.replace('(.*)', '*')
         # TODO: put the cache update on a worker threaded
