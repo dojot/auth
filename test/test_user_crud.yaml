@@ -1,0 +1,41 @@
+---
+- config:
+    - testset: "User CRUD Tests"
+
+- test:
+    - group: "user sane CRUD"
+    - name: "Make sure Mr alfred_testuser ISN'T there to begin with"
+    - url: "/user/alfred_testuser"
+    - expected_status: [404]
+
+- test:
+    - group: "user sane CRUD"
+    - name: "Create alfred"
+    - url: "/user"
+    - method: "POST"
+    - body: '{
+                "username": "alfred_testuser",
+                "passwd": "exemplepwd",
+                "service": "user",
+                "email": "alfred@noemail.com",
+                "name": "Alfred (TestUser)",
+                "profile": "user"
+              }'
+    - headers: {'Content-Type': 'application/json'}
+
+- test:
+    - group: "user sane CRUD"
+    - name: "Make sure Mr alfred is there after we added him"
+    - url: "/user/alfred_testuser"
+
+- test:
+    - group: "user sane CRUD"
+    - name: "Get rid of alfred!"
+    - url: "/user/alfred_testuser"
+    - method: 'DELETE'
+
+- test:
+    - group: "user sane CRUD"
+    - name: "Make sure Mr alfred ISN'T there after we deleted him"
+    - url: "/user/alfred"
+    - expected_status: [404]

@@ -75,20 +75,20 @@ def listUsers():
         return formatResponse(err.errorCode, err.message)
 
 
-@app.route('/user/<userid>', methods=['GET'])
-def getUser(userid):
+@app.route('/user/<user>', methods=['GET'])
+def getUser(user):
     try:
-        user = crud.getUser(db.session, int(userid))
+        user = crud.getUser(db.session, user)
         return make_response(json.dumps({"user": user.safeDict()}), 200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
 
-@app.route('/user/<userid>', methods=['PUT'])
-def updateUser(userid):
+@app.route('/user/<user>', methods=['PUT'])
+def updateUser(user):
     try:
         authData = loadJsonFromRequest(request)
-        oldUser = crud.updateUser(db.session, int(userid), authData)
+        oldUser = crud.updateUser(db.session, userid, authData)
 
         # Create a new kong secret and delete the old one
         kongData = kong.configureKong(oldUser.username)
@@ -108,12 +108,12 @@ def updateUser(userid):
         return formatResponse(err.errorCode, err.message)
 
 
-@app.route('/user/<userid>', methods=['DELETE'])
-def removeUser(userid):
+@app.route('/user/<user>', methods=['DELETE'])
+def removeUser(user):
     try:
-        old_user = crud.getUser(db.session, int(userid))
+        old_user = crud.getUser(db.session, user)
         kong.removeFromKong(old_user.username)
-        crud.deleteUser(db.session, int(userid))
+        crud.deleteUser(db.session, user)
         MVUserPermission.refresh()
         MVGroupPermission.refresh()
         db.session.commit()

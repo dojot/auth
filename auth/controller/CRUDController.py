@@ -92,22 +92,22 @@ def searchUser(dbSession, username=None):
     return users
 
 
-def getUser(dbSession, userId: int):
+def getUser(dbSession, user):
     try:
-        user = dbSession.query(User).filter_by(id=userId).one()
+        user = User.getByNameOrID(user)
         return user
     except (sqlalchemy.orm.exc.NoResultFound, ValueError):
         raise HTTPRequestError(404, "No user found with this ID")
 
 
-def updateUser(dbSession, userId: int, updatedInfo):
+def updateUser(dbSession, user, updatedInfo):
     # Drop invalid fields
     updatedInfo = {
                     k: updatedInfo[k]
                     for k in updatedInfo
                     if k in User.fillable + ['passwd']
                   }
-    oldUser = getUser(dbSession, userId)
+    oldUser = User.getByNameOrID(user)
 
     if 'username' in updatedInfo.keys() \
             and updatedInfo['username'] != oldUser.username:
@@ -144,9 +144,9 @@ def updateUser(dbSession, userId: int, updatedInfo):
     return oldUser
 
 
-def deleteUser(dbSession, userId: int):
+def deleteUser(dbSession, user):
     try:
-        user = dbSession.query(User).filter_by(id=userId).one()
+        user = User.getByNameOrID(user)
         dbSession.execute(
             UserPermission.__table__.delete(UserPermission.user_id == user.id)
         )
