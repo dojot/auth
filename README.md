@@ -1,4 +1,4 @@
-#dojot Authentication service
+# dojot Authentication service
 
 
 This service handles user authentication for the platform. Namely this is used to
@@ -99,8 +99,7 @@ aglio -i docs/auth.apib -o docs/auth.html
 aglio -i docs/auth.apib -s
 ```
 
-## tests
-
+## Tests
 
 Auth have some automated test scripts.
 We use [pyresttest](https://github.com/svanoort/pyresttest) format for the test schemas.
