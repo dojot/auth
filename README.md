@@ -103,9 +103,9 @@ aglio -i docs/auth.apib -s
 
 
 Auth have some automated test scripts.
-We use [pyresttest](https://github.com/svanoort/pyresttest) for the test schemas.
+We use [pyresttest](https://github.com/svanoort/pyresttest) format for the test schemas.
 You can run the test with:
 
 ```shell
-python resttest.py "http://localhost:port" test/test_user_crud.yaml
+python resttest.py "http://localhost:port" test/<TEST_FILE>.yaml
 ```

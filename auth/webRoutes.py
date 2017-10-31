@@ -222,31 +222,30 @@ def listGroup():
         return formatResponse(err.errorCode, err.message)
 
 
-@app.route('/pap/group/<groupId>', methods=['GET'])
-def getGroup(groupId):
+@app.route('/pap/group/<group>', methods=['GET'])
+def getGroup(group):
     try:
-        group = crud.getGroup(db.session, int(groupId))
+        group = crud.getGroup(db.session, group)
         return make_response(json.dumps(group.safeDict()), 200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
 
-@app.route('/pap/group/<groupId>', methods=['PUT'])
-def updateGroup(groupId):
+@app.route('/pap/group/<group>', methods=['PUT'])
+def updateGroup(group):
     try:
         groupData = loadJsonFromRequest(request)
-        crud.updateGroup(db.session, int(groupId), groupData)
+        crud.updateGroup(db.session, group, groupData)
         db.session.commit()
         return formatResponse(200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
 
-@app.route('/pap/group/<groupId>', methods=['DELETE'])
-def deleteGroup(groupId):
+@app.route('/pap/group/<group>', methods=['DELETE'])
+def deleteGroup(group):
     try:
-        crud.getGroup(db.session, int(groupId))
-        crud.deleteGroup(db.session, int(groupId))
+        crud.deleteGroup(db.session, group)
         MVGroupPermission.refresh()
         db.session.commit()
         return formatResponse(200)
