@@ -71,12 +71,12 @@ The following variables can be set
         * default: 420
 
   * AUTH_TOKEN_CHECK_SIGN
-        * If Auth should verify received JWT signatures. Ative this will cause one query of overhead.
+        * Whether Auth should verify received JWT signatures. Enabling this will cause one extra query to be performed.
         * default: False
 
   * AUTH_CACHE_NAME
-        * type of cache used. Currently only Redis is suported.
-        * If set to 'NOCACHE' Auth work without cache. Considerably degrade performance.
+        * Type of cache used. Currently only Redis is suported.
+        * If set to 'NOCACHE' auth will work without cache. Disabling cache usage considerably degrades performance.
         * default: redis
 
   * AUTH_CACHE_USER
@@ -130,7 +130,7 @@ aglio -i docs/auth.apib -s
 
 ## Tests
 
-Auth have some automated test scripts.
+Auth has some automated test scripts.
 We use [pyresttest](https://github.com/svanoort/pyresttest) format for the test schemas.
 You can run the test with:
 
