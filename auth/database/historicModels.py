@@ -11,7 +11,7 @@ from .flaskAlchemyInit import app, db
 # a list of special fields present on all historic tables
 # this list is necessary to avoid 'AttributeError' when coping from
 # non-history objects
-historicFields = ['deletion_date']
+historicFields = ['inactive_id', 'deletion_date']
 
 
 class UserInactive(db.Model):
@@ -26,7 +26,7 @@ class UserInactive(db.Model):
     deletion_date = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Kong and passwd related fields don't need to be registered on historic
-    def createInactiveFromUser(user):
+    def createInactiveFromUser(dbSession, user):
         userInactiveDict = {
                                 c.name: getattr(user, c.name)
                                 for c in UserInactive.__table__.columns
@@ -34,25 +34,26 @@ class UserInactive(db.Model):
                             }
 
         inactiveUser = UserInactive(**userInactiveDict)
-        return inactiveUser
+        dbSession.add(inactiveUser)
 
 
 class PasswdInactive(db.Model):
-    __tablename__ = 'user_inactive'
+    __tablename__ = 'passwd_inactive'
+
+    # sqlAlchemy require a primary key on every table
+    inactive_id = Column(Integer, primary_key=True, autoincrement=True)
 
     user_id = Column(Integer, autoincrement=False)
     hash = Column(String, nullable=False)
     salt = Column(String, nullable=False)
     deletion_date = Column(DateTime, default=datetime.datetime.utcnow)
 
-    def createInactiveFromUser(user):
+    def createInactiveFromUser(dbSession, user):
         pwdInactiveDict = {
-                                c.name: getattr(user, c.name)
-                                for c in UserInactive.__table__.columns
-                                if c.name not in historicFields
-                            }
+                            'user_id': user.id,
+                            'hash': user.hash,
+                            'salt': user.salt
+                           }
 
         inactivePwd = PasswdInactive(**pwdInactiveDict)
-        user.hash = None
-        user.salt = None
-        return inactivePwd
+        dbSession.add(inactivePwd)

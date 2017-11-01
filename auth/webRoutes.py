@@ -88,7 +88,7 @@ def getUser(user):
 def updateUser(user):
     try:
         authData = loadJsonFromRequest(request)
-        oldUser = crud.updateUser(db.session, userid, authData)
+        oldUser = crud.updateUser(db.session, user, authData)
 
         # Create a new kong secret and delete the old one
         kongData = kong.configureKong(oldUser.username)
