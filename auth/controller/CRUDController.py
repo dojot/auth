@@ -10,6 +10,7 @@ from database.Models import Permission, User, Group, PermissionEnum
 from database.Models import UserPermission, GroupPermission, UserGroup
 from database.flaskAlchemyInit import HTTPRequestError
 import database.Cache as cache
+import database.historicModels as inactiveTables
 
 
 # Helper function to check user fields
@@ -154,6 +155,10 @@ def deleteUser(dbSession, user):
             UserGroup.__table__.delete(UserGroup.user_id == user.id)
         )
         cache.deleteKey(userid=user.id)
+        # The user is not hardDeleted.
+        # it should be copied to inactiveUser table
+        inactive = inactiveTables.UserInactive.createInactiveFromUser(user)
+        dbSession.add(inactive)
         dbSession.delete(user)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No user found with this ID")
