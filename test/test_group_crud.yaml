@@ -37,7 +37,7 @@
     - url: "/pap/group/group1Test"
     - expected_status: [404]
 
-# duplicate cotrains test
+# duplicate constraints test
 
 - test:
     - group: "GROUP SANE CRUD"
