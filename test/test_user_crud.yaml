@@ -281,7 +281,7 @@
     - expected_status: [404]
 
 
-# Test user unique constrains
+# Test user unique constraint
 - test:
     - group: "INVALID DUPLICATE USER CRUD"
     - name: "Create first user"
