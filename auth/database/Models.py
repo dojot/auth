@@ -157,6 +157,15 @@ class UserGroup(db.Model):
                       primary_key=True, index=True)
 
 
+# table to keep the temporary password reset links
+class PasswordRequest(db.Model):
+    __tablename__ = 'passwd_request'
+
+    user_id = Column(Integer, primary_key=True, autoincrement=False)
+    link = Column(String, nullable=False, index=True)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
+
+
 class MVUserPermission(db.Model):
     selectClause = db.select([UserPermission.user_id,
                              Permission.id,

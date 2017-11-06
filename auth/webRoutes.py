@@ -15,6 +15,7 @@ import controller.RelationshipController as rship
 import controller.PDPController as pdpc
 import controller.AuthenticationController as auth
 import controller.ReportController as reports
+import controller.PasswordController as pwdc
 import kongUtils as kong
 from database.flaskAlchemyInit import app, db, formatResponse, \
                         HTTPRequestError, make_response, loadJsonFromRequest
@@ -378,6 +379,21 @@ def getGroupUsers(group):
         return make_response(json.dumps({"users": usersSafe}), 200)
 
 
+# passwd related endpoints
+@app.route('/passwd/reset', methods=['POST'])
+def passwdReset():
+    try:
+        token = request.headers.get('Authorization')
+        userId = auth.getJwtPayload(token[7:])['userid']
+        pwdc.createPasswordResetRequest(db.session, userId)
+        db.session.commit()
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        return formatResponse(200)
+
+
+# endpoint for development use. Should be blocked on prodution
 @app.route('/admin/dropcache', methods=['DELETE'])
 def dropCache():
     cache.deleteKey()

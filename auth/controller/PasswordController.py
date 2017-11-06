@@ -4,9 +4,13 @@
 import binascii
 from pbkdf2 import crypt
 import os
+import sqlalchemy
+import datetime
 
 from database.flaskAlchemyInit import HTTPRequestError
 from database.historicModels import PasswdInactive
+from database.Models import PasswordRequest
+import conf
 
 
 def create(passwd):
@@ -33,3 +37,28 @@ def update(dbSession, user, newPasswd):
                                         " not used before")
     PasswdInactive.createInactiveFromUser(dbSession, user)
     return create(newPasswd)
+
+
+def createPasswordResetRequest(dbSession, userId):
+    # veify if this user have and ative password reset request
+    try:
+        oldRequest = dbSession.query(PasswordRequest). \
+            filter_by(user_id=userId).one()
+        print(oldRequest.created_date)
+        print(type(oldRequest.created_date))
+        if ((oldRequest.created_date
+            + datetime.timedelta(minutes=conf.passwdRequestExpiration))
+                < datetime.datetime.now()):
+            dbSession.delete(oldRequest)
+            dbSession.commit()
+        else:
+            raise HTTPRequestError(409, 'You have a password reset'
+                                        ' request in progress')
+    except sqlalchemy.orm.exc.NoResultFound:
+        pass
+
+    requestDict = {'user_id': userId}
+    requestDict['link'] = str(binascii.hexlify(os.urandom(16)), 'ascii')
+
+    passwdRequest = PasswordRequest(**requestDict)
+    dbSession.add(passwdRequest)

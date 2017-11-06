@@ -30,3 +30,12 @@ tokenExpiration = int(os.environ.get("AUTH_TOKEN_EXP", 420))
 # query of overhead.
 checkJWTSign = (os.environ.get("AUTH_TOKEN_CHECK_SIGN", "FALSE") in
                 ['true', 'True', 'TRUE'])
+
+# email related configuration
+emailHost = os.environ.get("AUTH_EMAIL_HOST", "")
+emailPort = int(os.environ.get("AUTH_EMAIL_PORT", 587))
+emailUsername = os.environ.get("AUTH_EMAIL_USER", "")
+emailPasswd = os.environ.get("AUTH_EMAIL_PASSWD", "")
+
+# passwd policies configuration
+passwdRequestExpiration = int(os.environ.get("AUTH_PASSWD_REQUEST_EXP", 30))
