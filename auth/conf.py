@@ -39,3 +39,4 @@ emailPasswd = os.environ.get("AUTH_EMAIL_PASSWD", "")
 
 # passwd policies configuration
 passwdRequestExpiration = int(os.environ.get("AUTH_PASSWD_REQUEST_EXP", 30))
+passwdHistoryLen = int(os.environ.get("AUTH_PASSWD_HISTORY_LEN", 4))

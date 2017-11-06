@@ -381,11 +381,24 @@ def getGroupUsers(group):
 
 # passwd related endpoints
 @app.route('/passwd/reset', methods=['POST'])
-def passwdReset():
+def passwdResetRequest():
     try:
         token = request.headers.get('Authorization')
-        userId = auth.getJwtPayload(token[7:])['userid']
-        pwdc.createPasswordResetRequest(db.session, userId)
+        userJwt = auth.getJwtPayload(token[7:])
+        pwdc.createPasswordResetRequest(db.session, userJwt)
+        db.session.commit()
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        return formatResponse(200)
+
+
+# passwd related endpoints
+@app.route('/passwd/reset/<link>', methods=['POST'])
+def passwdReset(link):
+    try:
+        resetData = loadJsonFromRequest(request)
+        pwdc.resetPassword(db.session, link, resetData)
         db.session.commit()
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
