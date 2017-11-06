@@ -25,7 +25,10 @@ class UserInactive(db.Model):
     created_date = Column(DateTime, nullable=False)
     deletion_date = Column(DateTime, default=datetime.datetime.utcnow)
 
-    # Kong and passwd related fields don't need to be registered on historic
+    # Kong related fields don't need to be registered on historic
+    # password related fields are stored on passwd_inactive table
+
+    # receives a user model object and save it on inactive table
     def createInactiveFromUser(dbSession, user):
         userInactiveDict = {
                                 c.name: getattr(user, c.name)
@@ -48,6 +51,7 @@ class PasswdInactive(db.Model):
     salt = Column(String, nullable=False)
     deletion_date = Column(DateTime, default=datetime.datetime.utcnow)
 
+    # receives a user model object and save its passwd on inactive table
     def createInactiveFromUser(dbSession, user):
         pwdInactiveDict = {
                             'user_id': user.id,

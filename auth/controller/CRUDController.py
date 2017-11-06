@@ -153,6 +153,7 @@ def deleteUser(dbSession, user):
         cache.deleteKey(userid=user.id)
         # The user is not hardDeleted.
         # it should be copied to inactiveUser table
+        inactiveTables.PasswdInactive.createInactiveFromUser(dbSession, user)
         inactiveTables.UserInactive.createInactiveFromUser(dbSession, user)
         dbSession.delete(user)
     except sqlalchemy.orm.exc.NoResultFound:
