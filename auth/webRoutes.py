@@ -226,6 +226,8 @@ def listGroup():
             request.args['name'] if 'name' in request.args else None
         )
         groupsSafe = list(map(lambda p: p.safeDict(), groups))
+        for g in groupsSafe:
+            g['created_date'] = g['created_date'].isoformat()
         return make_response(json.dumps({"groups": groupsSafe}), 200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
@@ -235,7 +237,9 @@ def listGroup():
 def getGroup(group):
     try:
         group = crud.getGroup(db.session, group)
-        return make_response(json.dumps(group.safeDict()), 200)
+        group = group.safeDict()
+        group['created_date'] = group['created_date'].isoformat()
+        return make_response(json.dumps(group), 200)
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
 
@@ -380,12 +384,10 @@ def getGroupUsers(group):
 
 
 # passwd related endpoints
-@app.route('/passwd/reset', methods=['POST'])
-def passwdResetRequest():
+@app.route('/passwd/reset/<username>', methods=['POST'])
+def passwdResetRequest(username):
     try:
-        token = request.headers.get('Authorization')
-        userJwt = auth.getJwtPayload(token[7:])
-        pwdc.createPasswordResetRequest(db.session, userJwt)
+        pwdc.createPasswordResetRequest(db.session, username)
         db.session.commit()
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)
@@ -394,11 +396,24 @@ def passwdResetRequest():
 
 
 # passwd related endpoints
-@app.route('/passwd/reset/<link>', methods=['POST'])
+@app.route('/passwd/resetlink/<link>', methods=['POST'])
 def passwdReset(link):
     try:
         resetData = loadJsonFromRequest(request)
-        pwdc.resetPassword(db.session, link, resetData)
+        updatingUser = pwdc.resetPassword(db.session, link, resetData)
+
+        # password updated. Should reconfigure kong and Invalidate
+        # all previous logins
+        kongData = kong.configureKong(updatingUser.username)
+        if kongData is None:
+            return formatResponse(500,
+                                  'failed to configure verification subsystem')
+
+        kong.revokeKongSecret(updatingUser.username, updatingUser.kongId)
+        updatingUser.secret = kongData['secret']
+        updatingUser.key = kongData['key']
+        updatingUser.kongid = kongData['kongid']
+        db.session.add(updatingUser)
         db.session.commit()
     except HTTPRequestError as err:
         return formatResponse(err.errorCode, err.message)

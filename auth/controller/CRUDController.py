@@ -55,21 +55,16 @@ def createUser(dbSession, user):
     user = {k: user[k] for k in user if k in User.fillable + ['passwd']}
     checkUser(user)
 
-    try:
-        anotherUser = dbSession.query(User.id) \
-                                .filter_by(username=user['username']).one()
+    anotherUser = dbSession.query(User.id) \
+                           .filter_by(username=user['username']).one_or_none()
+    if anotherUser:
         raise HTTPRequestError(400, "username '"
-                                    + user['username']
-                                    + "' is in use.")
-    except sqlalchemy.orm.exc.NoResultFound:
-        pass
+                               + user['username']
+                               + "' is in use.")
 
-    try:
-        anotherUser = dbSession.query(User.id) \
-                            .filter_by(email=user['email']).one()
-    except sqlalchemy.orm.exc.NoResultFound:
-        pass
-    else:
+    anotherUser = dbSession.query(User.id) \
+                           .filter_by(email=user['email']).one_or_none()
+    if anotherUser:
         raise HTTPRequestError(400, "Email '" + user['email'] + "' is in use.")
     user['salt'], user['hash'] = passwd.create(user['passwd'])
     del user['passwd']
@@ -117,12 +112,11 @@ def updateUser(dbSession, user, updatedInfo):
 
     # Verify if the email is in use by another user
     if 'email' in updatedInfo.keys() and updatedInfo['email'] != oldUser.email:
-        try:
-            anotherUser = dbSession.query(User). \
-                            filter_by(email=updatedInfo['email']).one()
+        anotherUser = dbSession.query(User) \
+                               .filter_by(email=updatedInfo['email']) \
+                               .one_or_none()
+        if anotherUser:
             raise HTTPRequestError(400, "email already in use")
-        except sqlalchemy.orm.exc.NoResultFound:
-            pass
 
     if 'passwd' in updatedInfo.keys():
         oldUser.salt, oldUser.hash = passwd.update(dbSession,
@@ -269,12 +263,10 @@ def checkGroup(group):
 def createGroup(dbSession, groupData):
     groupData = {k: groupData[k] for k in groupData if k in Group.fillable}
     checkGroup(groupData)
-    try:
-        anotherGroup = dbSession.query(Group.id). \
-            filter_by(name=groupData['name']).one()
-    except sqlalchemy.orm.exc.NoResultFound:
-        pass
-    else:
+
+    anotherGroup = dbSession.query(Group.id) \
+                            .filter_by(name=groupData['name']).one_or_none()
+    if anotherGroup:
         raise HTTPRequestError(400,
                                "Group name '"
                                + groupData['name'] + "' is in use.")

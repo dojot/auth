@@ -1,6 +1,5 @@
 import smtplib
 from email.mime.text import MIMEText
-import getpass
 
 import conf
 
@@ -13,7 +12,8 @@ def sendMail(to, subject, htmlMsg):
     msg['To'] = to
 
     s = smtplib.SMTP(conf.emailHost, conf.emailPort)
-    s.starttls()
+    if conf.emailTLS:
+        s.starttls()
     s.login(conf.emailUsername, conf.emailPasswd)
 
     x = s.sendmail(conf.emailUsername, [to], msg.as_string())

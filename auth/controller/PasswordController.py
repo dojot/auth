@@ -72,31 +72,34 @@ def resetPassword(dbSession, link, resetData):
         if chechRequestValidity(dbSession, resetRequest):
             user = User.getByNameOrID(resetRequest.user_id)
             user.salt, user.hash = update(dbSession, user, resetData['passwd'])
-            dbSession.add(user)
 
             # remove this used reset request
             PasswordRequestInactive.createInactiveFromRequest(dbSession,
                                                               resetRequest)
             dbSession.delete(resetRequest)
+            return user
         else:
             raise HTTPRequestError(404, 'Page not found or expired')
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, 'Page not found or expired')
 
 
-def createPasswordResetRequest(dbSession, user):
-    # veify if this user have and ative password reset request
+def createPasswordResetRequest(dbSession, username):
     try:
-        oldRequest = dbSession.query(PasswordRequest). \
-            filter_by(user_id=user['userid']).one()
-        if chechRequestValidity(dbSession, oldRequest):
-            raise HTTPRequestError(409, 'You have a password reset'
-                                        ' request in progress')
+        user = dbSession.query(User). \
+            filter_by(username=username).one()
     except sqlalchemy.orm.exc.NoResultFound:
-        pass
+        raise HTTPRequestError(404, 'User not found')
+
+    # veify if this user have and ative password reset request
+    oldRequest = dbSession.query(PasswordRequest). \
+        filter_by(user_id=user.id).one_or_none()
+    if oldRequest and chechRequestValidity(dbSession, oldRequest):
+        raise HTTPRequestError(409, 'You have a password reset'
+                                    ' request in progress')
 
     requestDict = {
-                    'user_id': user['userid'],
+                    'user_id': user.id,
                     'link': str(binascii.hexlify(os.urandom(16)), 'ascii')
                   }
 
@@ -105,5 +108,5 @@ def createPasswordResetRequest(dbSession, user):
 
     with open('templates/passwordReset.html', 'r') as f:
         html = f.read()
-    html = html.format(name=user['name'], link=requestDict['link'])
-    sendMail(user['email'], 'Password Reset', html)
+    html = html.format(name=user.name, link=requestDict['link'])
+    sendMail(user.email, 'Password Reset', html)
