@@ -50,7 +50,7 @@ passwdHistoryLen = int(os.environ.get("AUTH_PASSWD_HISTORY_LEN", 4))
 # make some configuration checks
 # and warn if dangerous configuration is found
 if (emailHost == 'NOEMAIL'):
-    print("MAIL_HOST set to NOEMAIL. This is unsafe"
+    print("Warning: MAIL_HOST set to NOEMAIL. This is unsafe"
           " and there's no way to reset users forgotten password")
 
 if (emailHost != 'NOEMAIL' and
@@ -59,8 +59,8 @@ if (emailHost != 'NOEMAIL' and
           ' although a EMAIL_HOST was defined')
 
 if (emailHost != 'NOEMAIL' and not emailTLS):
-    print('Using e-mail without TLS is not safe')
+    print('Warning: Using e-mail without TLS is not safe')
 
 if (kongURL == 'DISABLED' and not checkJWTSign):
-    print('Disabling KONG_URL and TOKEN_CHECK_SIGN is dangerous, as'
+    print('Warning: Disabling KONG_URL and TOKEN_CHECK_SIGN is dangerous, as'
           ' auth have no way to guarantee a JWT token is valid')

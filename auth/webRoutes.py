@@ -426,6 +426,22 @@ def passwdReset(link):
         return formatResponse(200)
 
 
+@app.route('/passwd/update', methods=['POST'])
+def updatePasswd():
+    try:
+        token = request.headers.get('Authorization')
+        if not token:
+            return formatResponse(401, "not authorized")
+        userId = auth.getJwtPayload(token[7:])['userid']
+        updateData = loadJsonFromRequest(request)
+        pwdc.updateEndpoint(db.session, userId, updateData)
+        db.session.commit()
+    except HTTPRequestError as err:
+        return formatResponse(err.errorCode, err.message)
+    else:
+        return formatResponse(200)
+
+
 # endpoint for development use. Should be blocked on prodution
 @app.route('/admin/dropcache', methods=['DELETE'])
 def dropCache():

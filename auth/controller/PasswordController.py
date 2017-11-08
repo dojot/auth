@@ -48,6 +48,28 @@ def update(dbSession, user, newPasswd):
     return create(newPasswd)
 
 
+# an authenticated user can update it password
+def updateEndpoint(dbSession, userId, upData):
+    if 'oldpasswd' not in upData.keys() or len(upData['oldpasswd']) == 0:
+        raise HTTPRequestError(400, "Missing user's oldpasswd")
+
+    if 'newpasswd' not in upData.keys() or len(upData['newpasswd']) == 0:
+        raise HTTPRequestError(400, "Missing user's newpasswd")
+
+    try:
+        user = dbSession.query(User). \
+            filter_by(id=userId).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise HTTPRequestError(404, 'User not found')
+
+    if user.hash and (user.hash ==
+       crypt(upData['oldpasswd'], user.salt, 1000).split('$').pop()):
+        user.salt, user.hash = update(dbSession, user, upData['newpasswd'])
+        dbSession.add(user)
+    else:
+        raise HTTPRequestError(400, "Incorrect password")
+
+
 # chech if a PasswordRequest expired
 # if it is, will be removed
 def chechRequestValidity(dbSession, resetRequest):
