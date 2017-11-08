@@ -60,6 +60,9 @@ def createUser():
             groupSuccess, groupFailed = rship. \
                 addUserManyGroups(db.session, newUser.id, authData['profile'])
         db.session.commit()
+        if conf.emailHost == 'NOEMAIL':
+            pwdc.createPasswordSetRequest(db.session, newUser)
+            db.session.commit()
         return make_response(json.dumps({
                                         "user": newUser.safeDict(),
                                         "groups": groupSuccess,
@@ -386,6 +389,8 @@ def getGroupUsers(group):
 # passwd related endpoints
 @app.route('/passwd/reset/<username>', methods=['POST'])
 def passwdResetRequest(username):
+    if conf.emailHost == 'NOEMAIL':
+        return formatResponse(501, "Feature not configurated")
     try:
         pwdc.createPasswordResetRequest(db.session, username)
         db.session.commit()

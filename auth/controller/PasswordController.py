@@ -26,7 +26,8 @@ def create(passwd):
 # save the current passwd on inative table
 def update(dbSession, user, newPasswd):
     # check actual passwd
-    if user.hash == crypt(newPasswd, user.salt, 1000).split('$').pop():
+    if user.hash and (user.hash ==
+                      crypt(newPasswd, user.salt, 1000).split('$').pop()):
         raise HTTPRequestError(400, "Please, choose a password"
                                     " not used before")
 
@@ -110,3 +111,32 @@ def createPasswordResetRequest(dbSession, username):
         html = f.read()
     html = html.format(name=user.name, link=requestDict['link'])
     sendMail(user.email, 'Password Reset', html)
+
+
+def createPasswordSetRequest(dbSession, user):
+    # veify if this user have an ative password reset request
+    requestDict = {
+                    'user_id': user.id,
+                    'link': str(binascii.hexlify(os.urandom(16)), 'ascii')
+                  }
+
+    passwdRequest = PasswordRequest(**requestDict)
+    dbSession.add(passwdRequest)
+
+    with open('templates/passwordSet.html', 'r') as f:
+        html = f.read()
+    html = html.format(name=user.name,
+                       link=requestDict['link'],
+                       username=user.username)
+    sendMail(user.email, 'Account Activation', html)
+
+
+# force expiration of one user passwords reset request
+def expirePasswordResetRequests(dbSession, userid):
+    resetRequest = dbSession.query(PasswordRequest). \
+        filter_by(user_id=userid).one_or_none()
+    if resetRequest:
+            # save on inactive table before deletion
+            PasswordRequestInactive.createInactiveFromRequest(dbSession,
+                                                              resetRequest)
+            dbSession.delete(resetRequest)

@@ -53,6 +53,8 @@ class PasswdInactive(db.Model):
 
     # receives a user model object and save its passwd on inactive table
     def createInactiveFromUser(dbSession, user):
+        if not user.hash:
+            return
         pwdInactiveDict = {
                             'user_id': user.id,
                             'hash': user.hash,

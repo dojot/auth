@@ -32,7 +32,7 @@ checkJWTSign = (os.environ.get("AUTH_TOKEN_CHECK_SIGN", "FALSE") in
                 ['true', 'True', 'TRUE'])
 
 # email related configuration
-emailHost = os.environ.get("AUTH_EMAIL_HOST", "")
+emailHost = os.environ.get("AUTH_EMAIL_HOST", "NOEMAIL")
 emailPort = int(os.environ.get("AUTH_EMAIL_PORT", 587))
 emailTLS = (os.environ.get("AUTH_EMAIL_TLS", "true") in
             ['true', 'True', 'TRUE'])
@@ -49,6 +49,10 @@ passwdHistoryLen = int(os.environ.get("AUTH_PASSWD_HISTORY_LEN", 4))
 
 # make some configuration checks
 # and warn if dangerous configuration is found
+if (emailHost == 'NOEMAIL'):
+    print("MAIL_HOST set to NOEMAIL. This is unsafe"
+          " and there's no way to reset users forgotten password")
+
 if (emailHost != 'NOEMAIL' and
    (len(emailUsername) == 0 or len(emailPasswd) == 0)):
     print('Invalid configuration: No EMAIL_USER or EMAIL_PASSWD defined'

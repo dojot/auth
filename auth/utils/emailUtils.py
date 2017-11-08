@@ -5,6 +5,8 @@ import conf
 
 
 def sendMail(to, subject, htmlMsg):
+    if conf.emailHost == 'NOEMAIL':
+        return
     msg = MIMEText(htmlMsg, 'html')
 
     msg['Subject'] = subject

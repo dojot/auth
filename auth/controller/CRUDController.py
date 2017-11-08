@@ -9,6 +9,7 @@ from database.Models import UserPermission, GroupPermission, UserGroup
 from database.flaskAlchemyInit import HTTPRequestError
 import database.Cache as cache
 import database.historicModels as inactiveTables
+import conf
 
 
 # Helper function to check user fields
@@ -21,13 +22,6 @@ def checkUser(user, ignore=[]):
                                'Invalid username. usernames should start with'
                                ' a letter and only lowercase,'
                                ' alhpanumeric and underscores are allowed')
-
-    if ('passwd' not in ignore) and (
-                                        'passwd' not in user.keys()
-                                        or len(user['passwd']) == 0
-                                    ):
-        # if password was not provided
-        raise HTTPRequestError(400, "Missing passwd")
 
     if 'service' not in user.keys() or len(user['service']) == 0:
         raise HTTPRequestError(400, "Missing service")
@@ -47,12 +41,15 @@ def checkUser(user, ignore=[]):
     if 'name' not in user.keys() or len(user['name']) == 0:
         raise HTTPRequestError(400, "Missing user's name (full name)")
 
+    if 'profile' not in user.keys() or len(user['profile']) == 0:
+        raise HTTPRequestError(400, "Missing profile")
+
     return user
 
 
 def createUser(dbSession, user):
     # drop invalid fields
-    user = {k: user[k] for k in user if k in User.fillable + ['passwd']}
+    user = {k: user[k] for k in user if k in User.fillable}
     checkUser(user)
 
     anotherUser = dbSession.query(User.id) \
@@ -66,8 +63,10 @@ def createUser(dbSession, user):
                            .filter_by(email=user['email']).one_or_none()
     if anotherUser:
         raise HTTPRequestError(400, "Email '" + user['email'] + "' is in use.")
-    user['salt'], user['hash'] = passwd.create(user['passwd'])
-    del user['passwd']
+
+    if conf.emailHost == 'NOEMAIL':
+        user['salt'], user['hash'] = passwd.create('temppwd')
+
     user = User(**user)
     return user
 
@@ -97,7 +96,7 @@ def updateUser(dbSession, user, updatedInfo):
     updatedInfo = {
                     k: updatedInfo[k]
                     for k in updatedInfo
-                    if k in User.fillable + ['passwd']
+                    if k in User.fillable
                   }
     oldUser = User.getByNameOrID(user)
 
@@ -105,10 +104,7 @@ def updateUser(dbSession, user, updatedInfo):
             and updatedInfo['username'] != oldUser.username:
         raise HTTPRequestError(400, "usernames can't be updated")
 
-    if 'passwd' not in updatedInfo.keys():
-        checkUser(updatedInfo, ['passwd'])
-    else:
-        checkUser(updatedInfo)
+    checkUser(updatedInfo)
 
     # Verify if the email is in use by another user
     if 'email' in updatedInfo.keys() and updatedInfo['email'] != oldUser.email:
@@ -118,13 +114,6 @@ def updateUser(dbSession, user, updatedInfo):
         if anotherUser:
             raise HTTPRequestError(400, "email already in use")
 
-    if 'passwd' in updatedInfo.keys():
-        oldUser.salt, oldUser.hash = passwd.update(dbSession,
-                                                   oldUser,
-                                                   updatedInfo['passwd'])
-        del updatedInfo['passwd']
-
-    # TODO: find a iterative way
     if 'name' in updatedInfo.keys():
         oldUser.name = updatedInfo['name']
     if 'service' in updatedInfo.keys():
@@ -145,10 +134,12 @@ def deleteUser(dbSession, user):
             UserGroup.__table__.delete(UserGroup.user_id == user.id)
         )
         cache.deleteKey(userid=user.id)
+
         # The user is not hardDeleted.
         # it should be copied to inactiveUser table
         inactiveTables.PasswdInactive.createInactiveFromUser(dbSession, user)
         inactiveTables.UserInactive.createInactiveFromUser(dbSession, user)
+        passwd.expirePasswordResetRequests(dbSession, user.id)
         dbSession.delete(user)
     except sqlalchemy.orm.exc.NoResultFound:
         raise HTTPRequestError(404, "No user found with this ID")

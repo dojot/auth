@@ -79,8 +79,8 @@ class User(db.Model):
     service = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     profile = Column(String, nullable=False)
-    hash = Column(String, nullable=False)
-    salt = Column(String, nullable=False)
+    hash = Column(String, nullable=True)
+    salt = Column(String, nullable=True)
 
     # These fields are configured by kong after user creation
     secret = Column(String, nullable=False)
