@@ -97,7 +97,7 @@ def createPasswordResetRequest(dbSession, user):
 
     requestDict = {
                     'user_id': user['userid'],
-                    'link' = str(binascii.hexlify(os.urandom(16)), 'ascii')
+                    'link': str(binascii.hexlify(os.urandom(16)), 'ascii')
                   }
 
     passwdRequest = PasswordRequest(**requestDict)

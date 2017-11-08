@@ -14,8 +14,7 @@ def sendMail(to, subject, htmlMsg):
 
     s = smtplib.SMTP(conf.emailHost, conf.emailPort)
     s.starttls()
-    passwd = getpass.getpass()
-    s.login(conf.emailUsername, passwd)
+    s.login(conf.emailUsername, conf.emailPasswd)
 
     x = s.sendmail(conf.emailUsername, [to], msg.as_string())
     s.quit()

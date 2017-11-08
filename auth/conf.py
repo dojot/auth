@@ -34,9 +34,29 @@ checkJWTSign = (os.environ.get("AUTH_TOKEN_CHECK_SIGN", "FALSE") in
 # email related configuration
 emailHost = os.environ.get("AUTH_EMAIL_HOST", "")
 emailPort = int(os.environ.get("AUTH_EMAIL_PORT", 587))
+emailTLS = (os.environ.get("AUTH_EMAIL_TLS", "true") in
+            ['true', 'True', 'TRUE'])
 emailUsername = os.environ.get("AUTH_EMAIL_USER", "")
 emailPasswd = os.environ.get("AUTH_EMAIL_PASSWD", "")
 
 # passwd policies configuration
+# time to expire an password reset link in minutes
 passwdRequestExpiration = int(os.environ.get("AUTH_PASSWD_REQUEST_EXP", 30))
+# how many passwords should be check on the user history
+# to enforce no password repetition policy
 passwdHistoryLen = int(os.environ.get("AUTH_PASSWD_HISTORY_LEN", 4))
+
+
+# make some configuration checks
+# and warn if dangerous configuration is found
+if (emailHost != 'NOEMAIL' and
+   (len(emailUsername) == 0 or len(emailPasswd) == 0)):
+    print('Invalid configuration: No EMAIL_USER or EMAIL_PASSWD defined'
+          ' although a EMAIL_HOST was defined')
+
+if (emailHost != 'NOEMAIL' and not emailTLS):
+    print('Using e-mail without TLS is not safe')
+
+if (kongURL == 'DISABLED' and not checkJWTSign):
+    print('Disabling KONG_URL and TOKEN_CHECK_SIGN is dangerous, as'
+          ' auth have no way to guarantee a JWT token is valid')
