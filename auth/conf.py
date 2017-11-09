@@ -3,7 +3,6 @@
 
 import os
 
-
 # database related configuration
 dbName = os.environ.get("AUTH_DB_NAME", "postgres")
 dbUser = os.environ.get("AUTH_DB_USER", "auth")
@@ -39,6 +38,16 @@ emailTLS = (os.environ.get("AUTH_EMAIL_TLS", "true") in
 emailUsername = os.environ.get("AUTH_EMAIL_USER", "")
 emailPasswd = os.environ.get("AUTH_EMAIL_PASSWD", "")
 
+# if you are using a front end with Auth,
+# define this link to point to the password reset view on you FE
+resetPwdView = os.environ.get("AUTH_RESET_PWD_VIEW",
+                              "https://localhost:5000/passwd/resetlink")
+
+# if EMAIL_HOST is set to NOEMAIL a temporary password is given to
+# new users
+temporaryPassword = os.environ.get("AUTH_USER_TMP_PWD", "temppwd")
+
+
 # passwd policies configuration
 # time to expire an password reset link in minutes
 passwdRequestExpiration = int(os.environ.get("AUTH_PASSWD_REQUEST_EXP", 30))
@@ -63,4 +72,4 @@ if (emailHost != 'NOEMAIL' and not emailTLS):
 
 if (kongURL == 'DISABLED' and not checkJWTSign):
     print('Warning: Disabling KONG_URL and TOKEN_CHECK_SIGN is dangerous, as'
-          ' auth have no way to guarantee a JWT token is valid')
+          ' auth has no way to guarantee a JWT token is valid')

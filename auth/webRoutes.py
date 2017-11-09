@@ -390,7 +390,7 @@ def getGroupUsers(group):
 @app.route('/passwd/reset/<username>', methods=['POST'])
 def passwdResetRequest(username):
     if conf.emailHost == 'NOEMAIL':
-        return formatResponse(501, "Feature not configurated")
+        return formatResponse(501, "Feature not configured")
     try:
         pwdc.createPasswordResetRequest(db.session, username)
         db.session.commit()
@@ -401,9 +401,10 @@ def passwdResetRequest(username):
 
 
 # passwd related endpoints
-@app.route('/passwd/resetlink/<link>', methods=['POST'])
-def passwdReset(link):
+@app.route('/passwd/resetlink', methods=['POST'])
+def passwdReset():
     try:
+        link = request.args.get('link')
         resetData = loadJsonFromRequest(request)
         updatingUser = pwdc.resetPassword(db.session, link, resetData)
 
