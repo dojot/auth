@@ -5,20 +5,20 @@ delete Users, groups and permissions
 import re
 import sqlalchemy.orm.exc as orm_exceptions
 
-import controller.PasswordController as password
-from database.Models import Permission, User, Group, PermissionEnum
-import controller.RelationshipController as rship
-from database.Models import UserPermission, GroupPermission, UserGroup
-from database.flaskAlchemyInit import HTTPRequestError
-from database.inputConf import UserLimits, PermissionLimits, GroupLimits
-import database.Cache as cache
-import database.historicModels as inactiveTables
-import conf
-import kongUtils
-from database.flaskAlchemyInit import log
-from controller.KafkaPublisher import send_notification
-import controller.PasswordController as pwdc
-from database.Models import MVUserPermission, MVGroupPermission
+import auth.controller.PasswordController as password
+from auth.database.Models import Permission, User, Group, PermissionEnum
+import auth.controller.RelationshipController as rship
+from auth.database.Models import UserPermission, GroupPermission, UserGroup
+from auth.database.flaskAlchemyInit import HTTPRequestError
+from auth.database.inputConf import UserLimits, PermissionLimits, GroupLimits
+import auth.database.Cache as cache
+import auth.database.historicModels as inactiveTables
+import auth.conf as conf
+import auth.kongUtils as kongUtils
+from auth.database.flaskAlchemyInit import log
+from auth.dojot.KafkaPublisher import send_notification
+import auth.controller.PasswordController as pwdc
+from auth.database.Models import MVUserPermission, MVGroupPermission
 
 
 def check_user(user):
@@ -99,7 +99,7 @@ def create_user(db_session, user: User, requester):
     if db_session.query(User.id).filter_by(email=user['email']).one_or_none():
         raise HTTPRequestError(400, f"E-mail {user['email']} is in use.")
 
-    if conf.emailHost == 'NOEMAIL':
+    if conf.emailHost == '':
         user['salt'], user['hash'] = password.create_pwd(conf.temporaryPassword)
 
     # Last field to be filled automatically, before parsing
@@ -130,13 +130,17 @@ def create_user(db_session, user: User, requester):
             add_user_many_groups(db_session, new_user.id,
                                  user['profile'], requester)
         db_session.commit()
-    if conf.emailHost != 'NOEMAIL':
+    if conf.emailHost != '':
         pwdc.create_password_set_request(db_session, new_user)
         db_session.commit()
 
     if count_tenant_users(db_session, new_user.service) == 1:
         log().info(f"Will emit tenant lifecycle event {new_user.service} - CREATE")
-        send_notification({"type": 'CREATE', 'tenant': new_user.service})
+
+        send_notification(conf.dojot_service_management,
+                          conf.dojot_subject_tenancy,
+                          True,
+                          {"type": 'CREATE', 'tenant': new_user.service})
 
     ret = {
         "user": new_user.safe_dict(),
@@ -232,11 +236,15 @@ def update_user(db_session, user: str, updated_info, requester) -> (dict, str):
     # Publish messages related to service creation/deletion
     if count_tenant_users(db_session, old_service) == 0:
         log().info(f"will emit tenant lifecycle event {old_service} - DELETE")
-        send_notification({"type": 'DELETE', 'tenant': old_service})
+        send_notification(conf.dojot_service_management,
+                          conf.dojot_subject_tenancy,
+                          True, {"type": 'DELETE', 'tenant': old_service})
 
     if count_tenant_users(db_session, user.service) == 1:
         log().info(f"will emit tenant lifecycle event {user.service} - CREATE")
-        send_notification({"type": 'CREATE', 'tenant': user.service})
+        send_notification(conf.dojot_service_management,
+                          conf.dojot_subject_tenancy,
+                          True, {"type": 'CREATE', 'tenant': user.service})
 
     return old_user, old_service
 
@@ -283,7 +291,9 @@ def delete_user(db_session, username: str, requester):
 
         if count_tenant_users(db_session, user.service) == 0:
             log().info(f"will emit tenant lifecycle event {user.service} - DELETE")
-            send_notification({"type": 'DELETE', 'tenant': user.service})
+            send_notification(conf.dojot_service_management,
+                              conf.dojot_subject_tenancy,
+                              True, {"type": 'DELETE', 'tenant': user.service})
 
         return user
     except orm_exceptions.NoResultFound:
