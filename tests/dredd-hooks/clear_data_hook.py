@@ -1,8 +1,7 @@
 import dredd_hooks as hooks
-import controller.CRUDController as crud
-from database.flaskAlchemyInit import db
-from database.flaskAlchemyInit import HTTPRequestError
-
+import auth.controller.CRUDController as crud
+from auth.database.flaskAlchemyInit import db
+from auth.database.flaskAlchemyInit import HTTPRequestError
 
 @hooks.before_all
 def auth_clear_permissions_and_groups(transaction):
