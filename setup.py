@@ -3,8 +3,11 @@ import os
 
 import setuptools
 
-from pip._internal import download
-from pip._internal import req
+# For pip 10.x, this should be
+# from pip._internal import download
+# from pip._internal import req
+from pip import download
+from pip import req
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
