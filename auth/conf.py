@@ -17,7 +17,6 @@ db_port = os.environ.get("AUTH_DB_PORT", 5432)
 db_host = f"{db_address}:{db_port}"
 create_database = os.environ.get("AUTH_DB_CREATE", True)
 
-
 # cache related configuration
 cache_name = os.environ.get("AUTH_CACHE_NAME", "redis")
 cache_user = os.environ.get("AUTH_CACHE_USER", "redis")
@@ -32,15 +31,14 @@ cache_url = f"redis://{cache_user}:{cache_pdw}@{cache_host}/{cache_database}"
 # kong related configuration
 kongURL = os.environ.get("KONG_URL", "http://kong:8001")
 
-
 # JWT token related configuration
 tokenExpiration = int(os.environ.get("AUTH_TOKEN_EXP", 420))
 
 # email related configuration
 emailHost = os.environ.get("AUTH_SMTP_ADDRESS", "")
 emailPort = int(os.environ.get("AUTH_SMTP_PORT", 587))
-emailTLS = (os.environ.get("AUTH_SMTP_TLS", "true") in
-            ["true", "True", "TRUE"])
+emailTLS = (os.environ.get("AUTH_SMTP_TLS",
+                           "true") in ["true", "True", "TRUE"])
 emailUsername = os.environ.get("AUTH_SMTP_USER", "")
 emailPasswd = os.environ.get("AUTH_SMTP_PASSWD", "")
 
@@ -52,7 +50,6 @@ resetPwdView = os.environ.get("AUTH_RESET_PWD_VIEW", "")
 # to new users
 temporaryPassword = os.environ.get("AUTH_USER_TMP_PWD", "temppwd")
 
-
 # password policies configuration
 # time to expire an password reset link in minutes
 passwdRequestExpiration = int(os.environ.get("AUTH_PASSWD_REQUEST_EXP", 30))
@@ -62,13 +59,10 @@ passwdHistoryLen = int(os.environ.get("AUTH_PASSWD_HISTORY_LEN", 4))
 
 passwdMinLen = int(os.environ.get("AUTH_PASSWD_MIN_LEN", 8))
 
-
 password_blackList = os.environ.get("AUTH_PASSWD_BLACKLIST",
                                     "password_blacklist.txt")
 
-
 logMode = os.environ.get("AUTH_SYSLOG", "STDOUT")
-
 
 # make some configuration checks
 # and warn if dangerous configuration is found
@@ -94,12 +88,13 @@ kafka_port = os.environ.get("KAFKA_PORT", 9092)
 kafka_host = f"{kafka_address}:{kafka_port}"
 
 # Global subject to use when publishing tenancy lifecycle events
-dojot_subject_tenancy = os.environ.get("DOJOT_SUBJECT_TENANCY", "dojot.tenancy")
+dojot_subject_tenancy = os.environ.get("DOJOT_SUBJECT_TENANCY",
+                                       "dojot.tenancy")
 
 # Global service to use when publishing dojot management events
 # such as new tenants
 dojot_service_management = os.environ.get("DOJOT_SERVICE_MANAGEMENT",
-                                          "dojot-management")
+                                          "internal")
 
 # Kafka topic (subject) manager
 data_broker_host = os.environ.get("DATA_BROKER_URL", "http://data-broker")
