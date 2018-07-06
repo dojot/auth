@@ -3,6 +3,9 @@ import os
 
 import setuptools
 
+# For pip 10.x, this should be
+# from pip._internal import download
+# from pip._internal import req
 from pip import download
 from pip import req
 
@@ -15,13 +18,12 @@ def get_requirements(reqfile):
     deps = req.parse_requirements(path, session=download.PipSession())
     return [str(ir.req) for ir in deps]
 
-
 setuptools.setup(
     name='auth',
     description='Dojot authentication service',
     version=':versiontools:auth:',
-
     packages=setuptools.find_packages(),
+    package_data={"auth": ["templates/*"]},
     include_package_data=True,
     install_requires=get_requirements('requirements/requirements.txt'),
     setup_requires='versiontools',

@@ -4,7 +4,7 @@ set -e -x
 
 echo Running initialConf.py
 # create predefined users and groups
-python3 ./auth/initialConf.py
+python3 -m auth.initialConf
 rc=$?; if [[ ${rc} != 0 ]]; then exit ${rc}; fi
 echo initialConf.py ok
 
