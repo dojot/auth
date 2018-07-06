@@ -1,8 +1,8 @@
 import auth.conf as conf
 from alarmlibrary.connection import RabbitMqClientConnection
 from alarmlibrary.alarm import Alarm, AlarmSeverity
-from database.flaskAlchemyInit import log
-from database.flaskAlchemyInit import HTTPRequestError
+from auth.database.flaskAlchemyInit import log
+from auth.database.flaskAlchemyInit import HTTPRequestError
 
 class RabbitManager(object):
     def __init__(self, target=conf.rabbitmq_host):
@@ -13,7 +13,7 @@ class RabbitManager(object):
         if self.client is not None:
             return self.client
 
-        if self.target != "DISABLED":
+        if self.target != "":
             try:
                 self.client = RabbitMqClientConnection()
                 self.client.open(self.target)
