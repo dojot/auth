@@ -11,7 +11,7 @@ from .flaskAlchemyInit import db
 from .materialized_view_factory import create_mat_view
 from .materialized_view_factory import refresh_mat_view
 
-from database.flaskAlchemyInit import HTTPRequestError
+from auth.  database.flaskAlchemyInit import HTTPRequestError
 
 
 class PermissionEnum(enum.Enum):
