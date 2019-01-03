@@ -5,7 +5,7 @@ import json
 import conf
 from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError, NoBrokersAvailable
-
+from auth.healthcheck import HEALTHCHECK, ServiceStatus
 LOGGER = logging.getLogger('auth.' + __name__)
 LOGGER.addHandler(logging.StreamHandler())
 LOGGER.setLevel(logging.DEBUG)
@@ -68,10 +68,14 @@ def init():
     try:
         kf_prod = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                                 bootstrap_servers=conf.kafka_host)
+        HEALTHCHECK.kafka_producer_monitor.trigger("started", ServiceStatus.systemOk)
+        LOGGER.error("Kafka publisher is OK")
+
     except NoBrokersAvailable as e:
         LOGGER.error('No kafka brokers are available. No device event will be published.')
         LOGGER.error('Full exception is:')
         LOGGER.error('{}'.format(e))
+        HEALTHCHECK.kafka_producer_monitor.trigger("failed", ServiceStatus.systemFail, '{}'.format(e))
 
 
 init()
