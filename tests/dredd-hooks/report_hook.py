@@ -22,7 +22,7 @@ def create_sample_user_perm(transaction):
     global USER_PERMS
     user_id, group_id = auth.create_sample_users(transaction)
     perm_id = crud.create_sample_perms(transaction)
-    transaction['fullPath'] = transaction['fullPath'].replace("/admin/", f"/{user_id[0]}/")
+    transaction['fullPath'] = transaction['fullPath'].replace("/testadm/", f"/{user_id[0]}/")
     rship.add_user_permission(db.session, user_id[0], perm_id, REQUESTER)
     USER_PERMS.append((user_id[0], perm_id))
 
@@ -31,7 +31,7 @@ def create_sample_user_perm(transaction):
 def create_sample_user_group(transaction):
     global USER_GROUP, REQUESTER
     user_id, group_id = auth.create_sample_users(transaction)
-    transaction['fullPath'] = transaction['fullPath'].replace("/admin/", f"/{user_id[0]}/")
+    transaction['fullPath'] = transaction['fullPath'].replace("/testadm/", f"/{user_id[0]}/")
     # rship.add_user_group(db.session, user_id[0], group_id[0], REQUESTER)
     USER_GROUP.append((user_id[0], group_id[0]))
 

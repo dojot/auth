@@ -17,10 +17,10 @@ def create_sample_users(transaction):
     group_id = create_sample_groups(transaction)
 
     user = {
-        "name": "admin",
-        "username": "admin",
+        "name": "testadm",
+        "username": "testadm",
         "service": "admin",
-        "email": "admin@noemail.com",
+        "email": "testadm@noemail.com",
         "profile": "admin"
     }
     requester = {

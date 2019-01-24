@@ -56,7 +56,7 @@ def create_sample_groups(transaction):
         "username": "dredd"
     }
     group = {
-        "name": "admin",
+        "name": "testadm",
         "description": "admin"
     }
 

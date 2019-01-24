@@ -15,7 +15,7 @@ Authenticate with the system, returning a session token to be used with API
     + Body
 
             {
-                "username" : "admin",
+                "username" : "testadm",
                 "passwd" : "admin"
             }
 
@@ -160,12 +160,12 @@ Retrieves all information from a specific registered user
               "user": {
                 "created_by": "0",
                 "created_date": "2018-01-03 12:49:25.717374",
-                "email": "admin@noemail.com",
+                "email": "testadm@noemail.com",
                 "id": "1",
-                "name": "Admin (superuser)",
+                "name": "testadm",
                 "profile": "admin",
                 "service": "admin",
-                "username": "admin"
+                "username": "testadm"
               }
             }
 
@@ -194,7 +194,6 @@ Replaces user information. Fields or attributes that are not informed will rever
                 "service": "test",
                 "email": "test_new@noemail.com",
                 "name": "test",
-                "profile": "user"
             }
 
 + Response 200 (application/json)
