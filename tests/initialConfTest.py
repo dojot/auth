@@ -4,6 +4,7 @@
 import binascii
 import os
 from pbkdf2 import crypt
+from sqlalchemy import exc as sqlalchemy_exceptions
 from database.flaskAlchemyInit import db
 from database.Models import PermissionEnum, User, PermissionTypeEnum, Permission, MVUserPermission, MVGroupPermission, \
     Group, GroupPermission, UserGroup
