@@ -67,4 +67,3 @@ def auth_clear_everything_hook(transaction):
                 crud.delete_group(db.session, group.name, requester)
     except HTTPRequestError as e:
         pass
-

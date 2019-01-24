@@ -3,20 +3,9 @@
 
 import binascii
 import os
-from time import sleep
 from pbkdf2 import crypt
-
-from sqlalchemy import exc as sqlalchemy_exceptions
-import psycopg2
-
 from database.flaskAlchemyInit import db
-from database.Models import *
-from database.historicModels import *
-from database.materialized_view_factory import *
-
-import conf as CONFIG
 import initialConf as initialConf
-
 import kongUtils as kong
 
 
