@@ -19,7 +19,7 @@ def create_users():
             "username": "testadm",
             "service": "admin",
             "email": "testadm@noemail.com",
-            "profile": "admin",
+            "profile": "testadm",
             "passwd": "admin"
         }
     ]
@@ -95,30 +95,30 @@ def permission_dict_helper(name, path, method, permission=PermissionEnum.permit,
 
 def create_permissions():
     predef_perms = [
-        permission_dict_helper('all_all', "/(.*)", "(.*)"),
-        permission_dict_helper('all_template', "/template/(.*)", "(.*)"),
-        permission_dict_helper('ro_template', "/template/(.*)", "GET"),
-        permission_dict_helper('all_device', "/device/(.*)", "(.*)"),
-        permission_dict_helper('ro_device', "/device/(.*)", "GET"),
-        permission_dict_helper('all_flows', "/flows/(.*)", "(.*)"),
-        permission_dict_helper('ro_flows', "/flows/(.*)", "GET"),
-        permission_dict_helper('all_history', "/history/(.*)", "(.*)"),
-        permission_dict_helper('ro_history', "/history/(.*)", "GET"),
-        permission_dict_helper('all_metric', "/metric/(.*)", "(.*)"),
-        permission_dict_helper('ro_metric', "/metric/(.*)", "GET"),
-        permission_dict_helper('all_user', "/auth/user/(.*)", "(.*)"),
-        permission_dict_helper('ro_user', "/auth/user/(.*)", "GET"),
-        permission_dict_helper('all_pap', "/pap/(.*)", "(.*)"),
-        permission_dict_helper('ro_pap', "/pap/(.*)", "GET"),
-        permission_dict_helper('ro_ca', "/ca/(.*)", "GET"),
-        permission_dict_helper('wo_sign', "/sign/(.*)", "POST"),
-        permission_dict_helper('ro_socketio', "/stream/socketio/", "GET"),
-        permission_dict_helper('ro_import', "/import/(.*)", "GET"),
-        permission_dict_helper('all_import', "/import/(.*)", "(.*)"),
-        permission_dict_helper('ro_export', "/export/(.*)", "GET"),
-        permission_dict_helper('all_export', "/export/(.*)", "(.*)"),
-        permission_dict_helper('ro_image', "/fw-image/(.*)", "GET"),
-        permission_dict_helper('all_image', "/fw-image/(.*)", "(.*)")
+        permission_dict_helper('all_all_t', "/(.*)", "(.*)"),
+        permission_dict_helper('all_template_t', "/template/(.*)", "(.*)"),
+        permission_dict_helper('ro_template_t', "/template/(.*)", "GET"),
+        permission_dict_helper('all_device_t', "/device/(.*)", "(.*)"),
+        permission_dict_helper('ro_device_t', "/device/(.*)", "GET"),
+        permission_dict_helper('all_flows_t', "/flows/(.*)", "(.*)"),
+        permission_dict_helper('ro_flows_t', "/flows/(.*)", "GET"),
+        permission_dict_helper('all_history_t', "/history/(.*)", "(.*)"),
+        permission_dict_helper('ro_history_t', "/history/(.*)", "GET"),
+        permission_dict_helper('all_metric_t', "/metric/(.*)", "(.*)"),
+        permission_dict_helper('ro_metric_t', "/metric/(.*)", "GET"),
+        permission_dict_helper('all_user_t', "/auth/user/(.*)", "(.*)"),
+        permission_dict_helper('ro_user_t', "/auth/user/(.*)", "GET"),
+        permission_dict_helper('all_pap_t', "/pap/(.*)", "(.*)"),
+        permission_dict_helper('ro_pap_t', "/pap/(.*)", "GET"),
+        permission_dict_helper('ro_ca_t', "/ca/(.*)", "GET"),
+        permission_dict_helper('wo_sign_t', "/sign/(.*)", "POST"),
+        permission_dict_helper('ro_socketio_t', "/stream/socketio/", "GET"),
+        permission_dict_helper('ro_import_t', "/import/(.*)", "GET"),
+        permission_dict_helper('all_import_t', "/import/(.*)", "(.*)"),
+        permission_dict_helper('ro_export_t', "/export/(.*)", "GET"),
+        permission_dict_helper('all_export_t', "/export/(.*)", "(.*)"),
+        permission_dict_helper('ro_image_t', "/fw-image/(.*)", "GET"),
+        permission_dict_helper('all_image_t', "/fw-image/(.*)", "(.*)")
     ]
 
     for p in predef_perms:
@@ -149,23 +149,23 @@ def add_permissions_group():
         {
             "name": "testadm",
             "permission": [
-                'all_all'
+                'all_all_t'
             ]
         },
         {
             "name": "testuser",
             "permission": [
-                'all_template',
-                'all_device',
-                'all_flows',
-                'all_history',
-                'all_metric',
-                'ro_ca',
-                'wo_sign',
-                "ro_socketio",
-                "all_import",
-                "all_export",
-                "all_image"
+                'all_template_t',
+                'all_device_t',
+                'all_flows_t',
+                'all_history_t',
+                'all_metric_t',
+                'ro_ca_t',
+                'wo_sign_t',
+                "ro_socketio_t",
+                "all_import_t",
+                "all_export_t",
+                "all_image_t"
             ]
         }
     ]
