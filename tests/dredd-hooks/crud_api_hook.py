@@ -81,7 +81,7 @@ def create_sample_groups(transaction):
         print(f"Error: {e.message}")
 
     group = {
-        "name": "testuser",
+        "name": "test",
         "description": "Group for common users"
     }
 
