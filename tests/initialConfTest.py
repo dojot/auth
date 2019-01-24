@@ -5,6 +5,8 @@ import binascii
 import os
 from pbkdf2 import crypt
 from database.flaskAlchemyInit import db
+from database.Models import PermissionEnum, User, PermissionTypeEnum, Permission, MVUserPermission, MVGroupPermission, \
+    Group, GroupPermission, UserGroup
 import initialConf as initialConf
 import kongUtils as kong
 
@@ -26,8 +28,8 @@ def create_users():
         # if the user exist, chances are this scrip has been run before
         print("Querying database for user {}".format(user))
         another_user = db.session.query(User.id) \
-                                .filter_by(username=user['username']) \
-                                .one_or_none()
+            .filter_by(username=user['username']) \
+            .one_or_none()
         if another_user:
             print("This is not the first container run. Skipping")
             exit(0)
@@ -82,12 +84,46 @@ def create_groups():
 def permission_dict_helper(name, path, method, permission=PermissionEnum.permit, type_perm=PermissionTypeEnum.system):
     return {
         "name": name,
-        "path":  path,
+        "path": path,
         "method": method,
         "permission": permission,
         "type": type_perm,
         "created_by": 0
     }
+
+
+def create_permissions():
+    predef_perms = [
+        permission_dict_helper('all_all', "/(.*)", "(.*)"),
+        permission_dict_helper('all_template', "/template/(.*)", "(.*)"),
+        permission_dict_helper('ro_template', "/template/(.*)", "GET"),
+        permission_dict_helper('all_device', "/device/(.*)", "(.*)"),
+        permission_dict_helper('ro_device', "/device/(.*)", "GET"),
+        permission_dict_helper('all_flows', "/flows/(.*)", "(.*)"),
+        permission_dict_helper('ro_flows', "/flows/(.*)", "GET"),
+        permission_dict_helper('all_history', "/history/(.*)", "(.*)"),
+        permission_dict_helper('ro_history', "/history/(.*)", "GET"),
+        permission_dict_helper('all_metric', "/metric/(.*)", "(.*)"),
+        permission_dict_helper('ro_metric', "/metric/(.*)", "GET"),
+        permission_dict_helper('all_user', "/auth/user/(.*)", "(.*)"),
+        permission_dict_helper('ro_user', "/auth/user/(.*)", "GET"),
+        permission_dict_helper('all_pap', "/pap/(.*)", "(.*)"),
+        permission_dict_helper('ro_pap', "/pap/(.*)", "GET"),
+        permission_dict_helper('ro_ca', "/ca/(.*)", "GET"),
+        permission_dict_helper('wo_sign', "/sign/(.*)", "POST"),
+        permission_dict_helper('ro_socketio', "/stream/socketio/", "GET"),
+        permission_dict_helper('ro_import', "/import/(.*)", "GET"),
+        permission_dict_helper('all_import', "/import/(.*)", "(.*)"),
+        permission_dict_helper('ro_export', "/export/(.*)", "GET"),
+        permission_dict_helper('all_export', "/export/(.*)", "(.*)"),
+        permission_dict_helper('ro_image', "/fw-image/(.*)", "GET"),
+        permission_dict_helper('all_image', "/fw-image/(.*)", "(.*)")
+    ]
+
+    for p in predef_perms:
+        perm = Permission(**p)
+        db.session.add(perm)
+    db.session.commit()
 
 
 def add_user_groups():
@@ -143,5 +179,30 @@ def add_permissions_group():
     db.session.commit()
 
 
+def populate():
+    print("Creating initial user and permission...")
+    try:
+        print("Creating users")
+        create_users()
+        print("Creating groups")
+        create_groups()
+        print("Creating permissions")
+        initialConf.create_permissions()
+        print("Adding permissions to groups")
+        add_permissions_group()
+        print("Adding users to groups")
+        add_user_groups()
+    except sqlalchemy_exceptions.DBAPIError as err:
+        print("Could not connect to the database.")
+        print(err)
+        exit(-1)
+
+    # refresh views
+    MVUserPermission.refresh()
+    MVGroupPermission.refresh()
+    db.session.commit()
+    print("Success")
+
+
 initialConf.create_database()
-initialConf.populate()
+populate()
