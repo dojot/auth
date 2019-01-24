@@ -10,7 +10,10 @@ from database.Models import PermissionEnum, User, PermissionTypeEnum, Permission
     Group, GroupPermission, UserGroup
 import initialConf as initialConf
 import kongUtils as kong
-
+import psycopg2
+from time import sleep
+import conf as CONFIG
+from random import randint
 
 def create_users():
     predef_users = [
@@ -205,5 +208,37 @@ def populate():
     print("Success")
 
 
-initialConf.create_database()
+def create_database(num_retries=10, interval=3):
+    connection = None
+
+    attempt = 0
+    while attempt < num_retries:
+        try:
+            connection = psycopg2.connect(user=CONFIG.dbUser, password=CONFIG.dbPdw, host=CONFIG.dbHost)
+            print("postgres ok")
+            break
+        except Exception as e:
+            print("Failed to connect to database")
+
+        attempt += 1
+        sleep(interval)
+
+    if connection is None:
+        print("Database took too long to boot. Giving up.")
+        exit(1)
+    dbnamerandom = CONFIG.dbName + randint(0, 999)
+    if CONFIG.createDatabase:
+        connection.autocommit = True
+        cursor = connection.cursor()
+        cursor.execute("select true from pg_database where datname = '%s';" % dbnamerandom)
+        if len(cursor.fetchall()) == 0:
+            print("will attempt to create database")
+            cursor.execute("CREATE database %s;" % dbnamerandom)
+            print("creating schema")
+            db.create_all()
+        else:
+            print("Database already exists")
+
+#initialConf.create_database()
+create_database()
 populate()
