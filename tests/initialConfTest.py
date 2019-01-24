@@ -151,7 +151,7 @@ def add_permissions_group():
         {
             "name": "testadm",
             "permission": [
-                'all_all_t'
+                'all_all'
             ]
         },
         {
