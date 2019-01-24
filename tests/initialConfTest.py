@@ -8,7 +8,6 @@ from sqlalchemy import exc as sqlalchemy_exceptions
 from database.flaskAlchemyInit import db
 from database.Models import PermissionEnum, User, PermissionTypeEnum, Permission, MVUserPermission, MVGroupPermission, \
     Group, GroupPermission, UserGroup
-import initialConf as initialConf
 import kongUtils as kong
 import psycopg2
 from time import sleep
@@ -191,7 +190,7 @@ def populate():
         print("Creating groups")
         create_groups()
         print("Creating permissions")
-        initialConf.create_permissions()
+        create_permissions()
         print("Adding permissions to groups")
         add_permissions_group()
         print("Adding users to groups")
@@ -239,6 +238,5 @@ def create_database(num_retries=10, interval=3):
         else:
             print("Database already exists")
 
-#initialConf.create_database()
 create_database()
 populate()
