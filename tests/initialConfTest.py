@@ -12,7 +12,7 @@ import kongUtils as kong
 import psycopg2
 from time import sleep
 import conf as CONFIG
-from random import randint
+#from random import randint
 
 def create_users():
     predef_users = [
@@ -225,18 +225,19 @@ def create_database(num_retries=10, interval=3):
     if connection is None:
         print("Database took too long to boot. Giving up.")
         exit(1)
-    dbnamerandom = CONFIG.dbName + randint(0, 999)
+    #dbnamerandom = CONFIG.dbName + randint(0, 999)
     if CONFIG.createDatabase:
         connection.autocommit = True
         cursor = connection.cursor()
-        cursor.execute("select true from pg_database where datname = '%s';" % dbnamerandom)
+        cursor.execute("select true from pg_database where datname = '%s';" % CONFIG.dbName)
         if len(cursor.fetchall()) == 0:
             print("will attempt to create database")
-            cursor.execute("CREATE database %s;" % dbnamerandom)
+            cursor.execute("CREATE database %s;" % CONFIG.dbName)
             print("creating schema")
             db.create_all()
         else:
             print("Database already exists")
+
 
 create_database()
 populate()
