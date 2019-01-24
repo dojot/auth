@@ -68,7 +68,7 @@ def create_groups():
             "description": "Group with the highest access privilege"
         },
         {
-            "name": "user",
+            "name": "testuser",
             "description": "This groups can do anything, except manage users"
         }
     ]
@@ -153,7 +153,7 @@ def add_permissions_group():
             ]
         },
         {
-            "name": "user",
+            "name": "testuser",
             "permission": [
                 'all_template',
                 'all_device',

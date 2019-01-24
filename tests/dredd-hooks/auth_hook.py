@@ -21,7 +21,7 @@ def create_sample_users(transaction):
         "username": "testadm",
         "service": "admin",
         "email": "testadm@noemail.com",
-        "profile": "admin"
+        "profile": "testadm"
     }
     requester = {
         "userid": 0,
@@ -42,7 +42,7 @@ def create_sample_users(transaction):
         "username": "test",
         "service": "test",
         "email": "test@noemail.com",
-        "profile": "user"
+        "profile": "testuser"
     }
 
     try:
