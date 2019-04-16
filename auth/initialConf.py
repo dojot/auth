@@ -108,7 +108,6 @@ def create_permissions():
         permission_dict_helper('ro_device', "/device/(.*)", "GET"),
         permission_dict_helper('all_flows', "/flows/(.*)", "(.*)"),
         permission_dict_helper('ro_flows', "/flows/(.*)", "GET"),
-        permission_dict_helper('all_history', "/history/(.*)", "(.*)"),
         permission_dict_helper('ro_history', "/history/(.*)", "GET"),
         permission_dict_helper('all_user', "/auth/user/(.*)", "(.*)"),
         permission_dict_helper('ro_user', "/auth/user/(.*)", "GET"),
