@@ -113,16 +113,14 @@ def create_permissions():
         permission_dict_helper('ro_user', "/auth/user/(.*)", "GET"),
         permission_dict_helper('all_pap', "/auth/pap/(.*)", "(.*)"),
         permission_dict_helper('ro_pap', "/auth/pap/(.*)", "GET"),
-        permission_dict_helper('all_x509_ca', "/x509/v1/ca/(.*)", "(.*)"),
-        permission_dict_helper('ro_x509_ca', "/x509/v1/ca/(.*)", "GET"),
-        permission_dict_helper('all_x509_certificates', "/x509/v1/certificates/(.*)", "(.*)"),
-        permission_dict_helper('ro_x509_certificates', "/x509/v1/certificates/(.*)", "GET"),
+        permission_dict_helper('ro_ca', "/ca/(.*)", "GET"),
+        permission_dict_helper('wo_sign', "/sign/(.*)", "POST"),
         permission_dict_helper('ro_socketio', "/stream/socketio/", "GET"),
         permission_dict_helper('wo_import', "/import/(.*)", "POST"),
         permission_dict_helper('ro_export', "/export/(.*)", "GET"),
         permission_dict_helper('ro_image', "/fw-image/(.*)", "GET"),
         permission_dict_helper('all_image', "/fw-image/(.*)", "(.*)"),
-        permission_dict_helper('ro_mqtt_metrics', "/iotagent-mqtt/metrics", "GET")
+        permission_dict_helper('all_backstage', "/graphql/(.*)", "(.*)")
     ]
 
     for p in predef_perms:
@@ -163,14 +161,12 @@ def add_permissions_group():
                 'all_device',
                 'all_flows',
                 'ro_history',
-                'all_x509_ca',
-                'ro_x509_ca',
-                'all_x509_certificates',
-                'ro_x509_certificates',
+                'ro_ca',
+                'wo_sign',
                 "ro_socketio",
                 "wo_import",
                 "ro_export",
-                "ro_mqtt_metrics",
+                "all_backstage",
                 "all_image"
             ]
         }
@@ -221,10 +217,10 @@ def create_database(num_retries=10, interval=3):
             break
         except Exception as e:
             print("Failed to connect to database")
-
+        
         attempt += 1
         sleep(interval)
-
+    
     if connection is None:
         print("Database took too long to boot. Giving up.")
         exit(1)
