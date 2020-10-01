@@ -25,5 +25,5 @@ PyJWT==1.5.3
 redis==3.3.11
 requests==2.20.0
 SQLAlchemy==1.1.14
-urllib3==1.24.3
+urllib3==1.25.9
 Werkzeug==0.16.1
