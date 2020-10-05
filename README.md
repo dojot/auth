@@ -61,25 +61,46 @@ python3 initialConf.py
 Before running the service, always check if the environment variables are suited to your
 environment.
 
-| Name                  | Description                                                                                                   | Default value   | Accepted values
-| --------------------- | ------------------------------------------------------------------------------------------------------------- | --------------- | ---------------
-| AUTH_CACHE_DATABASE   | Cache database name (or number).                                                                              | 0               | string
-| AUTH_CACHE_HOST       | Address used to connect to the cache.                                                                         | redis           | hostname/IP
-| AUTH_CACHE_NAME       | Type of cache used. Currently only Redis is supported.                                                        | redis           | string
-| AUTH_CACHE_PWD        | Password to access the cache database.                                                                        | empty password  | string
-| AUTH_CACHE_TTL        | Cache entry time to live in seconds.                                                                          | 720             | number
-| AUTH_CACHE_USER       | Username to access the cache database.                                                                        | redis           | string
-| AUTH_DB_HOST          | Address used to connect to the database.                                                                      | http://postgres | hostname/IP
-| AUTH_DB_NAME          | Type of database used. Currently only PostgreSQL is supported.                                                | postgres        | string
-| AUTH_DB_PWD           | Database password.                                                                                            | empty password  | string
-| AUTH_DB_USER          | Database username.                                                                                            | auth            | string
-| AUTH_KONG_URL         | Kong location (If set to 'DISABLED' Auth won´t try to configure Kong and will generate secrets for the JWT tokens by itself). | http://kong:8001 | hostname/IP:port or DISABLE
-| AUTH_TOKEN_CHECK_SIGN | Whether Auth should verify received JWT signatures. Enabling this will cause one extra query to be performed. | False           | boolean
-| AUTH_TOKEN_EXP        | Expiration time in seconds for generated JWT tokens.                                                          | 420             | number
+| Name | Description | Default value | Accepted values
+| ---- | ----------- | ------------- | ---------------
+| AUTH_CACHE_DATABASE | Cache database name (or number). | 0 | string
+| AUTH_CACHE_HOST | Address used to connect to the cache. | redis | hostname/IP
+| AUTH_CACHE_NAME | Type of cache used. Currently only Redis is supported. Setting to `NOCACHE` disables the cache - beware that disabling it considerably degrades performance | redis | string
+| AUTH_CACHE_PWD | Password to access the cache database. | empty password | string
+| AUTH_CACHE_TTL | Cache entry time to live in seconds. | 720 | number
+| AUTH_CACHE_USER | Username to access the cache database. | redis | string
+| AUTH_DB_CREATE | Whether to create the database when initializing or not. Does not remove nor overwrite if it already exists. | True | boolean
+| AUTH_DB_HOST | Address used to connect to the database. | http://postgres | hostname/IP
+| AUTH_DB_NAME | Type of database used. Currently only PostgreSQL is supported. | postgres | string
+| AUTH_DB_PWD | Database password. | empty password | string
+| AUTH_DB_USER | Database username. | auth | string
+| AUTH_EMAIL_HOST | SMTP server to be used. If set to `NOEMAIL`, this functionality is disabled. | NOEMAIL | string
+| AUTH_EMAIL_PASSWD | SMTP password. | empty string | string
+| AUTH_EMAIL_PORT | SMTP server port. | 587 | number
+| AUTH_EMAIL_TLS | Whether to enable TLS or not for SMTP server. | True | boolean
+| AUTH_EMAIL_USER | SMTP user. | empty string | string
+| AUTH_KONG_URL | Kong location (If set to `DISABLED` Auth won´t try to configure Kong and will generate secrets for the JWT tokens by itself). | http://kong:8001 | hostname/IP:port or DISABLE
+| AUTH_PASSWD_BLACKLIST | File of blacklisted passwords. | password_blacklist.txt | string
+| AUTH_PASSWD_HISTORY_LEN | Number of passwords to check to enforce the no password repetition policy. | 4 | number
+| AUTH_PASSWD_MIN_LEN | Minimum length for passwords. | 8 | number
+| AUTH_PASSWD_REQUEST_EXP | Password reset link expiration (in minutes). | 30 | number
+| AUTH_RESET_PWD_VIEW | When using a front end with Auth, define this link to point to the password reset view. | empty string | string
+| AUTH_SYSLOG | Which stream to output the log messages. If set to `SYSLOG`, a log file will be created in `/var/log`. | STDOUT | STDOUT, SYSLOG
+| AUTH_TOKEN_CHECK_SIGN | Whether Auth should verify received JWT signatures. Enabling this will cause one extra query to be performed. | False | boolean
+| AUTH_TOKEN_EXP | Expiration time in seconds for generated JWT tokens. | 420 | number
+| AUTH_USER_TMP_PWD | The default temporary password that is given to new users if `AUTH_EMAIL_HOST` is set to `NOEMAIL`. | temppwd | string
+| DATA_BROKER_URL | Data broker URL. | http://data-broker | IP/hostname
+| DOJOT_MANAGEMENT_TENANT | Dojot management tenant name. | dojot-management | string
+| DOJOT_MANAGEMENT_USER | Dojot management user name. | auth | string
+| KAFKA_HOST | Kafka host to publish messages to. | kafka:9092 | hostname/IP:port
+| RABBITMQ_HOST | RabbitMQ host. | rabbitmq | IP/hostname:port
 
 # **Kafka Messages**
 
-This service publishes some messages to Kafka that are related to tenancy lifecycle events.
+This service publishes some messages to Kafka that are related to tenancy lifecycle events. The
+default topic is `dojot-management.dojot.tenancy`. The topic can be changed via the
+`DOJOT_MANAGEMENT_TENANT`. If you set this variable to, for example, `mytesttenant`, the topic will
+be `mytesttenant.dojot.tenancy`.
 
 ## **Tenant creation**
 
