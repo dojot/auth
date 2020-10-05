@@ -154,7 +154,6 @@ Check the documentation for more information:
 - [Latest Auth API documentation](https://dojot.github.io/auth/apiary_latest.html#auth)
 - [Development Auth API documentation](https://dojot.github.io/auth/apiary_development.html#auth)
 - [Latest dojot platform documentation](https://dojotdocs.readthedocs.io/en/latest)
-- [Development dojot platform documentation](https://dojotdocs.readthedocs.io/en/development)
 
 # **Issues and help**
 
