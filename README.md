@@ -15,6 +15,8 @@ service is responsible for generating the JWT token to be used when doing so.
    1. [Tenant removal](#tenant-removal)
 4. [API](#api)
 5. [Tests](#tests)
+6. [Documentation](#documentation)
+7. [Issues and help](#issues-and-help)
 
 # **Installation**
 
@@ -144,3 +146,17 @@ aglio -i docs/auth.apib -s
 
 Auth has some automated test scripts. We use [Dredd](http://dredd.org/en/latest/>) to execute them.
 Check the [Dockerfile](./tests/Dockerfile) used to build the test image to check how to run it.
+
+# **Documentation**
+
+Check the documentation for more information:
+
+- [Latest Auth API documentation](https://dojot.github.io/auth/apiary_latest.html#auth)
+- [Development Auth API documentation](https://dojot.github.io/auth/apiary_development.html#auth)
+- [Latest dojot platform documentation](https://dojotdocs.readthedocs.io/en/latest)
+- [Development dojot platform documentation](https://dojotdocs.readthedocs.io/en/development)
+
+# **Issues and help**
+
+If you found a problem or need help, leave an issue in the main
+[dojot repository](https://github.com/dojot/dojot) and we will help you!
