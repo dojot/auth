@@ -8,6 +8,12 @@ LOGGER = logging.getLogger('auth.' + __name__)
 LOGGER.addHandler(logging.StreamHandler())
 LOGGER.setLevel(logging.INFO)
 
+# Suggestion: instead of multiple variables, we could create and object to each configuration, like:
+# db: {
+#   name: ...,
+#   user: ...,
+# }
+
 # database related configuration
 dbName = os.environ.get("AUTH_DB_NAME", "dojot_auth")
 dbUser = os.environ.get("AUTH_DB_USER", "auth")
@@ -34,6 +40,8 @@ tokenExpiration = int(os.environ.get("AUTH_TOKEN_EXP", 420))
 # email related configuration
 emailHost = os.environ.get("AUTH_EMAIL_HOST", "NOEMAIL")
 emailPort = int(os.environ.get("AUTH_EMAIL_PORT", 587))
+# TODO: shouldn't this be treated as a boolean? If it must be a string, couldn't this be treated
+# differently, like downcasing the env var value and then checking if it equals to 'true'?
 emailTLS = (os.environ.get("AUTH_EMAIL_TLS", "true") in
             ['true', 'True', 'TRUE'])
 emailUsername = os.environ.get("AUTH_EMAIL_USER", "")
