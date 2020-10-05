@@ -95,7 +95,6 @@ environment.
 | DOJOT_MANAGEMENT_TENANT | Dojot management tenant name. | dojot-management | string
 | DOJOT_MANAGEMENT_USER | Dojot management user name. | auth | string
 | KAFKA_HOST | Kafka host to publish messages to. | kafka:9092 | hostname/IP:port
-| RABBITMQ_HOST | RabbitMQ host. | rabbitmq | IP/hostname:port
 
 # **Kafka Messages**
 
