@@ -63,7 +63,7 @@ environment.
 
 | Name                  | Description                                                                                                   | Default value   | Accepted values
 | --------------------- | ------------------------------------------------------------------------------------------------------------- | --------------- | ---------------
-| AUTH_CACHE_DATABASE   | Cache database name (or number)                                                                               | 0               | string
+| AUTH_CACHE_DATABASE   | Cache database name (or number).                                                                              | 0               | string
 | AUTH_CACHE_HOST       | Address used to connect to the cache.                                                                         | redis           | hostname/IP
 | AUTH_CACHE_NAME       | Type of cache used. Currently only Redis is supported.                                                        | redis           | string
 | AUTH_CACHE_PWD        | Password to access the cache database.                                                                        | empty password  | string
