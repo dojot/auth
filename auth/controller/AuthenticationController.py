@@ -13,7 +13,6 @@ import conf
 
 from database.flaskAlchemyInit import HTTPRequestError
 from database.Models import User
-from auth.alarms import AlarmError
 
 from dojot.module import Log
 
@@ -31,7 +30,7 @@ def authenticate(db_session, auth_data):
     try:
         user = db_session.query(User).filter_by(username=username.lower()).one()
     except orm_exceptions.NoResultFound:
-        raise AlarmError(401, 'AuthenticationError', username)
+        raise HTTPRequestError(401, 'AuthenticationError')
     except sqlalchemy_exceptions.DBAPIError:
         raise HTTPRequestError(500, 'Problem connecting to database')
 
@@ -58,7 +57,7 @@ def authenticate(db_session, auth_data):
         LOGGER.info('user ' + user.username + ' loged in')
         return str(encoded, 'ascii')
 
-    raise AlarmError(403, 'AuthorizationError', username, user.id)
+    raise HTTPRequestError(403, 'AuthorizationError')
 
 
 # this helper function receive a base64 JWT token

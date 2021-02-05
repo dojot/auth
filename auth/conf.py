@@ -102,6 +102,3 @@ dojot_management_user = os.environ.get('DOJOT_MANAGEMENT_USER', "auth")
 
 # Kafka topic (subject) manager
 data_broker_host =  os.environ.get("DATA_BROKER_URL", 'http://data-broker')
-
-# TODO: we haven't tested this for a while, is this really working? And is this really necessary?
-rabbitmq_host = os.environ.get("RABBITMQ_HOST", "rabbitmq")

@@ -1,0 +1,45 @@
+auth
+This software is copyright (c) 2020 by CPQD <www.cpqd.com.br>.
+
+It is licensed under Apache License, Version 2.0.
+
+It uses libraries, which are available under the following licenses:
+
+* Apache License, Version 2.0
+     - requests (source code available at https://github.com/psf/requests)
+     - kafka-python (source code available at https://github.com/dpkp/kafka-python)
+     - flask-redis (source code available at https://github.com/underyx/flask-redis)
+     - dojot.module (source code available at https://github.com/dojot/dojot-module-python)
+
+* MIT
+     - colorlog (source code available at https://github.com/borntyping/python-colorlog)
+     - redis (source code available at https://github.com/andymccurdy/redis-py)
+     - urllib3 (source code available at https://github.com/urllib3/urllib3)
+     - PyJWT (source code available at https://github.com/jpadilla/pyjwt)
+     - SQLAlchemy (source code available at https://github.com/sqlalchemy)
+     - gevent (source code available at https://github.com/gevent/gevent)
+     - greenlet (source code available at https://github.com/python-greenlet/greenlet)
+     - gunicorn (source code available at https://github.com/benoitc/gunicorn)
+     - json-logging-py (source code available at https://github.com/sebest/json-logging-py)
+     - marisa-trie (source code available at https://github.com/pytries/marisa-trie)
+     - pbkdf2 (source code available at https://github.com/dlitz/python-pbkdf2)
+     - dredd-hooks (source code available at https://github.com/apiaryio/dredd-hooks-python)
+
+* BSD (3-Clause)
+     - Click (source code available at https://github.com/pallets/click)
+     - Flask (source code available at https://github.com/pallets/flask)
+     - Flask-SQLAlchemy  (source code available at https://github.com/pallets/flask-sqlalchemy)
+     - Jinja2  (source code available at https://github.com/pallets/jinja)
+     - MarkupSafe (source code available at https://github.com/pallets/markupsafe)
+     - Werkzeug (source code available at https://github.com/pallets/werkzeug)
+     - itsdangerous (source code available at https://github.com/pallets/itsdangerous)
+
+* BSD-Like
+     - idna (source code available at https://github.com/kjd/idna)
+
+* MPL 2.0
+     - certifi (source code available at https://github.com/certifi/python-certifi)
+
+* LGPL
+     - chardet (source code available at https://github.com/chardet/chardet)
+     - psycopg2 (source code available at https://github.com/psycopg/psycopg2)
