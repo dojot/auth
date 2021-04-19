@@ -34,12 +34,13 @@ also be escaped
                 "id": 131
             }
 
-### Search permission [GET /pap/permission?{path,method,permission}]
+### Search permission [GET /pap/permission?{path,method,permission,type}]
 
 + Parameters
     + path: \/devices\/info (optional, string) - a path string.
     + method: POST (optional, enum) - one HTTP method.
     + permission: permit (optional, enum) - "permit" or "deny".
+    + type: api (optional, enum) - "api" or "system"
 
 + Request (application/json)
     + Headers
@@ -54,7 +55,8 @@ also be escaped
                             "id" : 131,
                             "path" : "/devices/info/\\*",
                             "method" : "POST|PUT|DELETE",
-                            "permission" : "permit"
+                            "permission" : "permit",
+                            "type": "api"
                     }
                 ]
             }
@@ -84,7 +86,8 @@ also be escaped
                 "id" : 131,
                 "path" : "/devices/info/\\*",
                 "method" : "POST|PUT|DELETE",
-                "permission" : "permit"
+                "permission" : "permit",
+                "type": "api"
             }
 
 
@@ -125,6 +128,19 @@ also be escaped
                 "message": "No permission with found this ID"
             }
 
++ Response 404 (application/json)
+
+            {
+                "status": 404,
+                "message": "No permission with found this ID"
+            }
++ Response 405 (application/json)
+
+            {
+                "status": 405,
+                "message": "Can't edit a system permission"
+            }
+
 ### Remove a permission [DELETE]
 
 + Request
@@ -133,7 +149,7 @@ also be escaped
             Authorization: Bearer JWT
 
 + Response 200 (application/json)
-    
+
             {
                 "status": 200,
                 "message": "ok"
@@ -144,6 +160,12 @@ also be escaped
             {
                 "status": 404,
                 "message": "No permission found with this ID"
+            }
++ Response 405 (application/json)
+
+            {
+                "status": 405,
+                "message": "Can't delete a system permission"
             }
 
 ## Group creation [/pap/group]
@@ -162,7 +184,7 @@ also be escaped
             }
 
 + Response 200 (application/json)
-    
+
             {
                 "status": 200,
                 "id": 3
@@ -179,15 +201,15 @@ also be escaped
 ### Search Groups [GET /pap/group?name={name}]
 
 + Parameters
-    + name: admin (optional, string) - a group name, or part of a group name.
+    + name: testadm (optional, string) - a group name, or part of a group name.
 
 + Response 200 (application/json)
-            
+
             {
                 "groups": [
                     {
                         "id" : 3,
-                        "name" : "admin",
+                        "name" : "testadm",
                         "description" : "Full privilege group"
                     }
                 ]
@@ -218,7 +240,7 @@ also be escaped
             }
 
 + Response 404 (application/json)
-    
+
             {
                 "status": 404,
                 "message": "No group found with this ID"
@@ -232,9 +254,9 @@ also be escaped
             Authorization: Bearer JWT
 
     + Body
-    
+
             {
-                "name": "admin",
+                "name": "testadm",
                 "description" : "projectX"
             }
 
@@ -252,6 +274,12 @@ also be escaped
                 "message": "No group found with this ID"
             }
 
++ Response 405 (application/json)
+
+            {
+                "status": 405,
+                "message": "Can't edit admin group"
+            }
 
 ### Remove a group [DELETE]
 + Request (application/json)
@@ -273,3 +301,9 @@ also be escaped
                 "message": "No group found with this ID"
             }
 
++ Response 405 (application/json)
+
+            {
+                "status": 405,
+                "message": "Can't delete admin group""
+            }
