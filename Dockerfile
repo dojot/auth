@@ -19,7 +19,9 @@ FROM python:3.6-alpine
 COPY --from=basis /usr/src/venv /usr/src/venv
 COPY . /usr/src/app
 
-RUN apk update && apk --no-cache add libpq libstdc++
+RUN apk update && apk --no-cache add libpq libstdc++ tini
+
+ENTRYPOINT ["/sbin/tini", "--"]
 
 ENV VIRTUAL_ENV="/usr/src/venv"
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
